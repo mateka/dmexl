@@ -4,8 +4,8 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -15,18 +15,18 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  *
  * @author matek
  */
-public class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>>
-        extends BinaryNode<List<Result>, Algorithm<List<Element>>, Algorithm<Operation>> {
+public abstract class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>>
+        extends BinaryNode<Collection<Result>, Algorithm<Iterable<Element>>, Algorithm<Operation>> {
 
-    public TransformNode(Algorithm<List<Element>> left, Algorithm<Operation> right) {
+    public TransformNode(Algorithm<Iterable<Element>> left, Algorithm<Operation> right) {
         super(left, right);
     }
 
     @Override
-    public ResultType<List<Result>> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<Collection<Result>> sequentialExecute(IExecutionContext ctx) {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
-        ResultType<List<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
+        ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
         if (!aResult.isOk()) {
             return new ResultType<>(null, false);
         }
@@ -37,30 +37,30 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
         }
 
         // Get data for accumulate algorithm
-        List<Element> elements = aResult.getResult();
+        Iterator<Element> elements = ctx.iterator(aResult.getResult());
         Operation op = bResult.getResult();
 
         // Do sequential algorithm
-        final int left = ctx.getDomainPart().getLeft(elements);
-        final int right = ctx.getDomainPart().getRight(elements);
-
         boolean ok = true;
-        List<Result> resultElements = new ArrayList<>(right - left);
-        for (int i = left; ok && (i < right); ++i) {
-            ResultType<Result> res = op.invoke(elements.get(i));
-            if (res.isOk()) resultElements.add(i, res.getResult());
+        Collection<Result> resultElements = createNewCollection();
+        while (ok && elements.hasNext()) {
+            ResultType<Result> res = op.invoke(elements.next());
+            if (res.isOk()) resultElements.add(res.getResult());
             else ok = false;
         }
+        //return new ResultType<>(resultElements, ok);
         return new ResultType<>(resultElements, ok);
     }
 
     @Override
-    public ResultType<List<Result>> multiCPUExecute(IExecutionContext ctx) {
+    public ResultType<Collection<Result>> multiCPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public ResultType<List<Result>> GPUExecute(IExecutionContext ctx) {
+    public ResultType<Collection<Result>> GPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    protected abstract Collection<Result> createNewCollection();
 }

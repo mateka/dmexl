@@ -4,9 +4,8 @@
  */
 package pl.edu.mimuw.dmexlib.execution_contexts;
 
-import pl.edu.mimuw.dmexlib.domain.DomainPart;
-import pl.edu.mimuw.dmexlib.domain.FullDomain;
-import pl.edu.mimuw.dmexlib.domain.IDomainPart;
+import java.util.Iterator;
+import pl.edu.mimuw.dmexlib.SkipIterator;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
 
@@ -18,23 +17,27 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
 
     public SimpleSequentialExecutionContext(SequentialExecutor executor) {
         this.executor = executor;
-        this.domainPart = new FullDomain();
     }
 
-    public SimpleSequentialExecutionContext(SequentialExecutor executor, DomainPart domainPart) {
+    public <T> SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
         this.executor = executor;
-        this.domainPart = domainPart;
+        this.skip = skip;
+    }
+
+    @Override
+    public <T> Iterator<T> iterator(Iterable<T> coll) {
+        if (null != skip) {
+            return new SkipIterator(coll, this.start, this.skip);
+        } else {
+            return coll.iterator();
+        }
     }
 
     @Override
     public IExecutor getExecutor() {
         return executor;
     }
-
-    @Override
-    public IDomainPart getDomainPart() {
-        return domainPart;
-    }
     private SequentialExecutor executor;
-    private IDomainPart domainPart;
+    private Integer start;
+    private Integer skip;
 }

@@ -4,7 +4,7 @@
  */
 package pl.edu.mimuw.dmexlib.execution_contexts;
 
-import pl.edu.mimuw.dmexlib.domain.IDomainPart;
+import java.util.Iterator;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 
 /**
@@ -13,6 +13,6 @@ import pl.edu.mimuw.dmexlib.executors.IExecutor;
  * @author matek
  */
 public interface IExecutionContext {
-    public IExecutor getExecutor();
-    public IDomainPart getDomainPart();
+    public abstract IExecutor getExecutor();
+    public abstract <T> Iterator<T> iterator(Iterable<T> i);
 }
