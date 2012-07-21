@@ -10,6 +10,7 @@ import static pl.edu.mimuw.dmexlib.dmexl.*;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 /**
  * Hello world!
@@ -42,6 +43,13 @@ public class App
         Iterator<Integer> it=l.iterator();
         while(it.hasNext()) System.out.print(it.next() +",");
         System.out.println();
+        
+        // Filter odd elements
+        Algorithm<Collection<Integer>> removeOddAlg = filter(is, new IsEvenOp());
+        Collection<Integer> ev = e.execute(removeOddAlg).getResult();
+        Iterator<Integer> it2=ev.iterator();
+        while(it2.hasNext()) System.out.print(it2.next() +",");
+        System.out.println();
     }
     
     private static class SumOp implements IAccumulateOperation<Integer, Integer> {
@@ -59,6 +67,15 @@ public class App
         @Override
         public ResultType<Integer> invoke(Integer arg) {
             return new ResultType<>(2 * arg);
+        }
+        
+    }
+    
+    private static class IsEvenOp implements IFilterOperation<Integer> {
+
+        @Override
+        public boolean invoke(Integer arg) {
+            return 0 == (arg % 2);
         }
         
     }
