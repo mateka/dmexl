@@ -48,7 +48,7 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
             if (res.isOk()) resultElements.add(res.getResult());
             else ok = false;
         }
-        //return new ResultType<>(resultElements, ok);
+
         return new ResultType<>(resultElements, ok);
     }
 
