@@ -4,7 +4,6 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.Collection;
 import java.util.HashSet;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
@@ -13,14 +12,14 @@ import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
  *
  * @author matek
  */
-public class FilterToHashSetNode<Type, Filter extends IFilterOperation<Type>> extends FilterNode<Type, Filter> {
+public class FilterToHashSetNode<Type, Filter extends IFilterOperation<Type>> extends FilterNode<Type, Filter, HashSet<Type>> {
 
     public FilterToHashSetNode(Algorithm<Iterable<Type>> elements, Algorithm<Filter> filter) {
         super(elements, filter);
     }
 
     @Override
-    protected Collection<Type> createNewCollection() {
+    protected HashSet<Type> createNewCollection() {
         return new HashSet<>();
     }
     

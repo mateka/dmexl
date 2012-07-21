@@ -13,7 +13,7 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  * @author matek
  */
 public class TransformToHashSetNode <Result, Element, Operation extends ITransformOperation<Result, Element>>
-extends TransformNode<Result, Element, Operation>{
+extends TransformNode<Result, Element, Operation, HashSet<Result>>{
 
     public TransformToHashSetNode(Algorithm<Iterable<Element>> left, Algorithm<Operation> right) {
         super(left, right);

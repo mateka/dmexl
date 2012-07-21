@@ -1,9 +1,6 @@
 package pl.edu.mimuw.dmexl_examples;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
@@ -38,17 +35,27 @@ public class App
         System.out.println("The sum is: " + sum);
         
         // mul2 all elements
-        Algorithm<Collection<Integer>> mulAlg = transform(is, new TwoMulOp());
+        Algorithm<? extends Collection<Integer>> mulAlg = transform(is, new TwoMulOp());
         Collection<Integer> l = e.execute(mulAlg).getResult();
         Iterator<Integer> it=l.iterator();
         while(it.hasNext()) System.out.print(it.next() +",");
         System.out.println();
         
         // Filter odd elements
-        Algorithm<Collection<Integer>> removeOddAlg = filter(is, new IsEvenOp());
+        Algorithm<? extends Collection<Integer>> removeOddAlg = filter(is, new IsEvenOp());
         Collection<Integer> ev = e.execute(removeOddAlg).getResult();
         Iterator<Integer> it2=ev.iterator();
         while(it2.hasNext()) System.out.print(it2.next() +",");
+        System.out.println();
+        
+        // Filter duplicates
+        List<Integer> duplicates = new ArrayList<>(is);
+        Iterator<Integer> isToDup = is.iterator();
+        while(isToDup.hasNext()) duplicates.add(isToDup.next());
+        Algorithm<? extends Set<Integer>> toSet = set(transform(duplicates, new TwoMulOp()));
+        Set<Integer> deduplicated = e.execute(toSet).getResult();
+        Iterator<Integer> dedit=deduplicated.iterator();
+        while(dedit.hasNext()) System.out.print(dedit.next() +",");
         System.out.println();
     }
     

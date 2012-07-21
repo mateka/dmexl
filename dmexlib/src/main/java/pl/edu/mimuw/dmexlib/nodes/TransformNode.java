@@ -15,15 +15,15 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  *
  * @author matek
  */
-public abstract class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>>
-        extends BinaryNode<Collection<Result>, Algorithm<Iterable<Element>>, Algorithm<Operation>> {
+public abstract class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>, CollectionType extends Collection<Result>>
+        extends BinaryNode<CollectionType, Algorithm<Iterable<Element>>, Algorithm<Operation>> {
 
     public TransformNode(Algorithm<Iterable<Element>> left, Algorithm<Operation> right) {
         super(left, right);
     }
 
     @Override
-    public ResultType<Collection<Result>> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> sequentialExecute(IExecutionContext ctx) {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -42,7 +42,7 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
 
         // Do sequential algorithm
         boolean ok = true;
-        Collection<Result> resultElements = createNewCollection();
+        CollectionType resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(elements.next());
             if (res.isOk()) resultElements.add(res.getResult());
@@ -53,14 +53,14 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
     }
 
     @Override
-    public ResultType<Collection<Result>> multiCPUExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> multiCPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public ResultType<Collection<Result>> GPUExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> GPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    protected abstract Collection<Result> createNewCollection();
+    protected abstract CollectionType createNewCollection();
 }

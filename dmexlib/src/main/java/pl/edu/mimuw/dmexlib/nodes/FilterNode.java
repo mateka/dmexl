@@ -15,15 +15,15 @@ import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
  *
  * @author matek
  */
-public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>>
-        extends BinaryNode<Collection<Type>, Algorithm<Iterable<Type>>, Algorithm<Filter>> {
+public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, CollectionType extends Collection<Type>>
+        extends BinaryNode<CollectionType, Algorithm<Iterable<Type>>, Algorithm<Filter>> {
 
     public FilterNode(Algorithm<Iterable<Type>> elements, Algorithm<Filter> filter) {
         super(elements, filter);
     }
 
     @Override
-    public ResultType<Collection<Type>> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> sequentialExecute(IExecutionContext ctx) {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Type>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -41,7 +41,7 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>>
         Filter op = bResult.getResult();
 
         // Do sequential algorithm
-        Collection<Type> resultElements = createNewCollection();
+        CollectionType resultElements = createNewCollection();
         while (elements.hasNext()) {
             Type e = elements.next();
             if(op.invoke(e)) resultElements.add(e);
@@ -51,14 +51,14 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>>
     }
 
     @Override
-    public ResultType<Collection<Type>> multiCPUExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> multiCPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public ResultType<Collection<Type>> GPUExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> GPUExecute(IExecutionContext ctx) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    protected abstract Collection<Type> createNewCollection();
+    protected abstract CollectionType createNewCollection();
 }
