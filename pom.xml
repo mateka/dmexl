@@ -25,5 +25,6 @@
   <modules>
     <module>dmexlib</module>
     <module>dmexl_examples</module>
+    <module>dmexlib_rseslib</module>
   </modules>
 </project>
