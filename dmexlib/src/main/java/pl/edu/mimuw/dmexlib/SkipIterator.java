@@ -13,8 +13,12 @@ import java.util.Iterator;
 public class SkipIterator<E> implements Iterator<E> {
 
     public SkipIterator(Iterable<E> base, int start, int skip) {
+        if (skip < start) {
+            throw new IllegalArgumentException("skip < start");
+        }
+
         this.current = base.iterator();
-        this.skip = skip;
+        this.skip = skip-1;
 
         for (int i = 0; i < start && current.hasNext(); ++i) {
             current.next();
@@ -33,7 +37,7 @@ public class SkipIterator<E> implements Iterator<E> {
         for (int i = 0; i < skip && current.hasNext(); ++i) {
             current.next();
         }
-        
+
         return result;
     }
 
@@ -41,7 +45,6 @@ public class SkipIterator<E> implements Iterator<E> {
     public void remove() {
         throw new UnsupportedOperationException("Not supported.");
     }
-
     private Iterator<E> current;
     private int skip;
 }

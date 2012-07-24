@@ -21,6 +21,7 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
 
     public <T> SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
         this.executor = executor;
+        this.start = start;
         this.skip = skip;
     }
 
