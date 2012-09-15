@@ -5,6 +5,7 @@
 package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -22,7 +23,7 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
     }
 
     @Override
-    public ResultType<Result> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getA(), ctx);
@@ -35,15 +36,15 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
         if (!cResult.isOk()) return new ResultType<>(null, false);
 
         // Get data for accumulate algorithm
-        Iterator<Element> elements = ctx.iterator(aResult.getResult());
-        Operation op = bResult.getResult();
-        Result zero = cResult.getResult();
+        Iterator<Element> elements = ctx.iterator(aResult.get());
+        Operation op = bResult.get();
+        Result zero = cResult.get();
 
         // Do sequential accumulation
         boolean ok = true;
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(zero, elements.next());
-            if (res.isOk()) zero = res.getResult();
+            if (res.isOk()) zero = res.get();
             else ok = false;
         }
         // TODO make copy of zero?
@@ -51,12 +52,7 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
     }
 
     @Override
-    public ResultType<Result> multiCPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public ResultType<Result> GPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public ResultType<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        return ctx.getExecutor().execute(this, ctx);
     }
 }

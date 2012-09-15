@@ -4,6 +4,7 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 
@@ -18,18 +19,13 @@ public class IdentityNode<Type> extends UnaryNode<Type, Type> {
     }
 
     @Override
-    public ResultType<Type> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<Type> execute(IExecutionContext ctx) {
         return new ResultType<>(getArgument());
     }
 
     @Override
-    public ResultType<Type> multiCPUExecute(IExecutionContext ctx) {
-        return sequentialExecute(ctx);
+    public ResultType<Type> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        return ctx.getExecutor().execute(this, ctx);
     }
 
-    @Override
-    public ResultType<Type> GPUExecute(IExecutionContext ctx) {
-        return sequentialExecute(ctx);
-    }
-    
 }

@@ -6,6 +6,7 @@ package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -23,7 +24,7 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
     }
 
     @Override
-    public ResultType<CollectionType> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Type>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -37,8 +38,8 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
         }
 
         // Get data for accumulate algorithm
-        Iterator<Type> elements = ctx.iterator(aResult.getResult());
-        Filter op = bResult.getResult();
+        Iterator<Type> elements = ctx.iterator(aResult.get());
+        Filter op = bResult.get();
 
         // Do sequential algorithm
         CollectionType resultElements = createNewCollection();
@@ -51,14 +52,10 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
     }
 
     @Override
-    public ResultType<CollectionType> multiCPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        return ctx.getExecutor().execute(this, ctx);
     }
-
-    @Override
-    public ResultType<CollectionType> GPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    
     
     protected abstract CollectionType createNewCollection();
 }

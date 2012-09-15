@@ -4,6 +4,7 @@
  */
 package pl.edu.mimuw.dmexlib;
 
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 
 /**
@@ -13,7 +14,6 @@ import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
  */
 public interface Algorithm<Result> {
     // TODO Methods should be public or package private?
-    public ResultType<Result> sequentialExecute(IExecutionContext ctx);
-    public ResultType<Result> multiCPUExecute(IExecutionContext ctx);
-    public ResultType<Result> GPUExecute(IExecutionContext ctx);
+    public ResultType<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException;
+    public ResultType<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException;
 }

@@ -5,6 +5,9 @@
 package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
+import pl.edu.mimuw.dmexlib.Algorithm;
+import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.SkipIterator;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
@@ -15,16 +18,18 @@ import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
  */
 public class SimpleSequentialExecutionContext implements IExecutionContext {
 
-    public SimpleSequentialExecutionContext(SequentialExecutor executor) {
-        this.executor = executor;
+    public SimpleSequentialExecutionContext() {
+        this.executor = new SequentialExecutor();
     }
 
-    public <T> SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
+    public SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
         this.executor = executor;
         this.start = start;
         this.skip = skip;
     }
 
+    
+    
     @Override
     public <T> Iterator<T> iterator(Iterable<T> coll) {
         if (null != skip) {
@@ -38,6 +43,12 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
     public IExecutor getExecutor() {
         return executor;
     }
+
+    @Override
+    public <Result> ResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
+        return getExecutor().execute(algo, this);
+    }
+    
     private SequentialExecutor executor;
     private Integer start;
     private Integer skip;

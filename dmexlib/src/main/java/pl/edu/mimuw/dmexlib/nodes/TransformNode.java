@@ -6,6 +6,7 @@ package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -23,7 +24,7 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
     }
 
     @Override
-    public ResultType<CollectionType> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<CollectionType> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -37,15 +38,15 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
         }
 
         // Get data for accumulate algorithm
-        Iterator<Element> elements = ctx.iterator(aResult.getResult());
-        Operation op = bResult.getResult();
+        Iterator<Element> elements = ctx.iterator(aResult.get());
+        Operation op = bResult.get();
 
         // Do sequential algorithm
         boolean ok = true;
         CollectionType resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(elements.next());
-            if (res.isOk()) resultElements.add(res.getResult());
+            if (res.isOk()) resultElements.add(res.get());
             else ok = false;
         }
 
@@ -53,13 +54,8 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
     }
 
     @Override
-    public ResultType<CollectionType> multiCPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public ResultType<CollectionType> GPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        return ctx.getExecutor().execute(this, ctx);
     }
     
     protected abstract CollectionType createNewCollection();

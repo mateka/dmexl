@@ -4,31 +4,50 @@
  */
 package pl.edu.mimuw.dmexlib;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  *
  * @author matek
  */
-public class ResultType<Result> {
+public class ResultType<Result> extends IResultType<Result> {
 
     public ResultType(Result result, boolean ok) {
+        super(ok);
         this.result = result;
-        this.ok = ok;
     }
 
     public ResultType(Result result) {
+        super(true);
         this.result = result;
-        this.ok = true;
     }
 
-    public boolean isOk() {
-        return ok;
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
     }
 
-    public Result getResult() {
+    @Override
+    public boolean isCancelled() {
+        return !isDone();
+    }
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
+
+    @Override
+    public Result get() throws InterruptedException, ExecutionException {
         return result;
     }
-    
+
+    @Override
+    public Result get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return get();
+    }
     
     private Result result;
-    private boolean ok;
 }

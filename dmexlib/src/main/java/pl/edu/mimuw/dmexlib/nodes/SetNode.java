@@ -7,6 +7,7 @@ package pl.edu.mimuw.dmexlib.nodes;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -22,7 +23,7 @@ public class SetNode<Type> extends UnaryNode<Set<Type>, Algorithm<Iterable<Type>
     }
 
     @Override
-    public ResultType<Set<Type>> sequentialExecute(IExecutionContext ctx) {
+    public ResultType<Set<Type>> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Type>> arg = ctx.getExecutor().execute(getArgument(), ctx);
@@ -31,7 +32,7 @@ public class SetNode<Type> extends UnaryNode<Set<Type>, Algorithm<Iterable<Type>
         }
 
         // Get data for accumulate algorithm
-        Iterator<Type> elements = ctx.iterator(arg.getResult());
+        Iterator<Type> elements = ctx.iterator(arg.get());
 
         // Do sequential algorithm
         Set<Type> resultSet = new HashSet<>();
@@ -42,12 +43,8 @@ public class SetNode<Type> extends UnaryNode<Set<Type>, Algorithm<Iterable<Type>
     }
 
     @Override
-    public ResultType<Set<Type>> multiCPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public ResultType<Set<Type>> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        return ctx.getExecutor().execute(this, ctx);
     }
 
-    @Override
-    public ResultType<Set<Type>> GPUExecute(IExecutionContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }
