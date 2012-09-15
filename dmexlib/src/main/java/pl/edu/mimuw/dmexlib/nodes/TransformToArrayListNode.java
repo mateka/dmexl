@@ -20,7 +20,7 @@ extends TransformNode<Result, Element, Operation, ArrayList<Result>>{
     }
 
     @Override
-    protected ArrayList<Result> createNewCollection() {
+    public ArrayList<Result> createNewCollection() {
         return new ArrayList<>();
     }
     

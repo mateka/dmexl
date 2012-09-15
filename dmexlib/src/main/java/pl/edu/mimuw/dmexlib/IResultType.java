@@ -10,15 +10,7 @@ import java.util.concurrent.Future;
  *
  * @author matek
  */
-public abstract class IResultType<Result> implements Future<Result> {
+public interface IResultType<Result> extends Future<Result> {
 
-    public IResultType(boolean ok) {
-        this.ok = ok;
-    }
-
-    public boolean isOk() {
-        return ok;
-    }
-
-    private boolean ok;
+    public boolean isOk();
 }

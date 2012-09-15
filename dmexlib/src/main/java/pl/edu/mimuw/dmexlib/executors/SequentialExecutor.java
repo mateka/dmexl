@@ -25,15 +25,15 @@ import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
  *
  * @author matek
  */
-public class SequentialExecutor implements IExecutor {
+public class SequentialExecutor extends OptimizingExecutor {
     
     public SequentialExecutor(ITreeOptimizer treeOptimizer) {
-        this.optimizer = treeOptimizer;
+        super(treeOptimizer);
     }
 
     @Override
     public <Result> ResultType<Result> execute(Algorithm<Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
-        return optimizer.optimize(algo).execute(ctx);
+        return getOptimizer().optimize(algo).execute(ctx);
     }
 
     @Override
@@ -61,5 +61,4 @@ public class SequentialExecutor implements IExecutor {
         return execute((Algorithm<R>)algo, ctx);
     }
     
-    private ITreeOptimizer optimizer;
 }

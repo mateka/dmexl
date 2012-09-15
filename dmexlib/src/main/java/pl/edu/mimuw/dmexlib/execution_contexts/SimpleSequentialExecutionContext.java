@@ -45,7 +45,7 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
 
     @Override
     public <Result> ResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
-        return getExecutor().execute(algo, this);
+        return algo.accept(this);
     }
     private SequentialExecutor executor;
     private Integer start;

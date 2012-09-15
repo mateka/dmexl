@@ -12,16 +12,21 @@ import java.util.concurrent.TimeoutException;
  *
  * @author matek
  */
-public class ResultType<Result> extends IResultType<Result> {
+public class ResultType<Result> implements IResultType<Result> {
 
     public ResultType(Result result, boolean ok) {
-        super(ok);
         this.result = result;
+        this.ok = ok;
     }
 
     public ResultType(Result result) {
-        super(true);
         this.result = result;
+        this.ok = true;
+    }
+    
+    @Override
+    public boolean isOk() {
+        return ok;
     }
 
     @Override
@@ -50,4 +55,5 @@ public class ResultType<Result> extends IResultType<Result> {
     }
     
     private Result result;
+    private boolean ok;
 }

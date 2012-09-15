@@ -18,11 +18,11 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  */
 public abstract class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>, CollectionType extends Collection<Result>>
         extends BinaryNode<CollectionType, Algorithm<Iterable<Element>>, Algorithm<Operation>> {
-
+    
     public TransformNode(Algorithm<Iterable<Element>> left, Algorithm<Operation> right) {
         super(left, right);
     }
-
+    
     @Override
     public ResultType<CollectionType> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
@@ -31,9 +31,10 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
         if (!aResult.isOk()) {
             return new ResultType<>(null, false);
         }
-
+        
         ResultType<Operation> bResult = ctx.getExecutor().execute(getRight(), ctx);
         if (!bResult.isOk()) {
+            aResult.cancel(true);
             return new ResultType<>(null, false);
         }
 
@@ -46,17 +47,20 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
         CollectionType resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(elements.next());
-            if (res.isOk()) resultElements.add(res.get());
-            else ok = false;
+            if (res.isOk()) {
+                resultElements.add(res.get());
+            } else {
+                ok = false;
+            }
         }
-
+        
         return new ResultType<>(resultElements, ok);
     }
-
+    
     @Override
     public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
     
-    protected abstract CollectionType createNewCollection();
+    public abstract CollectionType createNewCollection();
 }

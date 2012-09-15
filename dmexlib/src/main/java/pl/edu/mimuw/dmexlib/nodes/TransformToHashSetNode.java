@@ -20,7 +20,7 @@ extends TransformNode<Result, Element, Operation, HashSet<Result>>{
     }
 
     @Override
-    protected HashSet<Result> createNewCollection() {
+    public HashSet<Result> createNewCollection() {
         return new HashSet<>();
     }
     

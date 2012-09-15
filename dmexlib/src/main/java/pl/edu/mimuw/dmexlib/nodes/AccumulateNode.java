@@ -27,13 +27,22 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getA(), ctx);
-        if (!aResult.isOk()) return new ResultType<>(null, false);
+        if (!aResult.isOk()) {
+            return new ResultType<>(null, false);
+        }
 
         ResultType<Operation> bResult = ctx.getExecutor().execute(getB(), ctx);
-        if (!bResult.isOk()) return new ResultType<>(null, false);
+        if (!bResult.isOk()) {
+            aResult.cancel(true);
+            return new ResultType<>(null, false);
+        }
 
         ResultType<Result> cResult = ctx.getExecutor().execute(getC(), ctx);
-        if (!cResult.isOk()) return new ResultType<>(null, false);
+        if (!cResult.isOk()) {
+            aResult.cancel(true);
+            bResult.cancel(true);
+            return new ResultType<>(null, false);
+        }
 
         // Get data for accumulate algorithm
         Iterator<Element> elements = ctx.iterator(aResult.get());
@@ -44,8 +53,11 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
         boolean ok = true;
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(zero, elements.next());
-            if (res.isOk()) zero = res.get();
-            else ok = false;
+            if (res.isOk()) {
+                zero = res.get();
+            } else {
+                ok = false;
+            }
         }
         // TODO make copy of zero?
         return new ResultType<>(zero, ok);

@@ -23,12 +23,12 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 public class NoOpOptimizer implements ITreeOptimizer {
 
     @Override
-    public <T> Algorithm<T> optimize(IdentityNode<T> node) {
+    public <T> IdentityNode<T> optimize(IdentityNode<T> node) {
         return node;
     }
 
     @Override
-    public <T> Algorithm<Set<T>> optimize(SetNode<T> node) {
+    public <T> SetNode<T> optimize(SetNode<T> node) {
         return node;
     }
 
@@ -38,12 +38,12 @@ public class NoOpOptimizer implements ITreeOptimizer {
     }
 
     @Override
-    public <R, E, O extends ITransformOperation<R, E>, C extends Collection<R>> Algorithm<C> optimize(TransformNode<R, E, O, C> node) {
+    public <R, E, O extends ITransformOperation<R, E>, C extends Collection<R>> TransformNode<R, E, O, C> optimize(TransformNode<R, E, O, C> node) {
         return node;
     }
 
     @Override
-    public <R, E, O extends IAccumulateOperation<R, E>> Algorithm<R> optimize(AccumulateNode<R, E, O> node) {
+    public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> optimize(AccumulateNode<R, E, O> node) {
         return node;
     }
 

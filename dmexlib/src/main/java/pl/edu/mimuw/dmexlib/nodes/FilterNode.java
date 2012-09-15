@@ -34,6 +34,7 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
 
         ResultType<Filter> bResult = ctx.getExecutor().execute(getRight(), ctx);
         if (!bResult.isOk()) {
+            aResult.cancel(true);
             return new ResultType<>(null, false);
         }
 
@@ -45,7 +46,9 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
         CollectionType resultElements = createNewCollection();
         while (elements.hasNext()) {
             Type e = elements.next();
-            if(op.invoke(e)) resultElements.add(e);
+            if (op.invoke(e)) {
+                resultElements.add(e);
+            }
         }
 
         return new ResultType<>(resultElements);
@@ -55,7 +58,6 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
     public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
-    
-    
-    protected abstract CollectionType createNewCollection();
+
+    public abstract CollectionType createNewCollection();
 }

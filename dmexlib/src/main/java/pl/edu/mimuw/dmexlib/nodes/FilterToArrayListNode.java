@@ -19,7 +19,7 @@ public class FilterToArrayListNode<Type, Filter extends IFilterOperation<Type>> 
     }
 
     @Override
-    protected ArrayList<Type> createNewCollection() {
+    public ArrayList<Type> createNewCollection() {
         return new ArrayList<>();
     }
     

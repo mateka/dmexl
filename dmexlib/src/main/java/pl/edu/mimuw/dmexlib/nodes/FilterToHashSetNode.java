@@ -19,7 +19,7 @@ public class FilterToHashSetNode<Type, Filter extends IFilterOperation<Type>> ex
     }
 
     @Override
-    protected HashSet<Type> createNewCollection() {
+    public HashSet<Type> createNewCollection() {
         return new HashSet<>();
     }
     
