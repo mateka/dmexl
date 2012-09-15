@@ -11,6 +11,7 @@ import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.SkipIterator;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
+import pl.edu.mimuw.dmexlib.optimizers.NoOpOptimizer;
 
 /**
  *
@@ -19,7 +20,7 @@ import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
 public class SimpleSequentialExecutionContext implements IExecutionContext {
 
     public SimpleSequentialExecutionContext() {
-        this.executor = new SequentialExecutor();
+        this.executor = new SequentialExecutor(new NoOpOptimizer());
     }
 
     public SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
@@ -28,8 +29,6 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
         this.skip = skip;
     }
 
-    
-    
     @Override
     public <T> Iterator<T> iterator(Iterable<T> coll) {
         if (null != skip) {
@@ -48,7 +47,6 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
     public <Result> ResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
         return getExecutor().execute(algo, this);
     }
-    
     private SequentialExecutor executor;
     private Integer start;
     private Integer skip;

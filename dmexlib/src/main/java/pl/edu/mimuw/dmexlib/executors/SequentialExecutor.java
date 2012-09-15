@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.ResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
-import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
 import pl.edu.mimuw.dmexlib.nodes.FilterNode;
 import pl.edu.mimuw.dmexlib.nodes.IdentityNode;
@@ -19,6 +18,7 @@ import pl.edu.mimuw.dmexlib.nodes.TransformNode;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 
 /**
  * Simple, sequential executor
@@ -26,10 +26,14 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  * @author matek
  */
 public class SequentialExecutor implements IExecutor {
+    
+    public SequentialExecutor(ITreeOptimizer treeOptimizer) {
+        this.optimizer = treeOptimizer;
+    }
 
     @Override
     public <Result> ResultType<Result> execute(Algorithm<Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
-        return algo.execute(ctx);
+        return optimizer.optimize(algo).execute(ctx);
     }
 
     @Override
@@ -56,4 +60,6 @@ public class SequentialExecutor implements IExecutor {
     public <R, E, O extends IAccumulateOperation<R, E>> ResultType<R> execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return execute((Algorithm<R>)algo, ctx);
     }
+    
+    private ITreeOptimizer optimizer;
 }
