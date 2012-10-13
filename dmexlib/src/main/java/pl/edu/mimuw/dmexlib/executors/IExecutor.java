@@ -27,4 +27,6 @@ public interface IExecutor {
     public <R, E, O extends ITransformOperation<R, E>> IResultType<List<R>> execute(TransformNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException;
     public <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException;    
     public <Result> IResultType<Result> execute(Algorithm<Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException;
+    
+    public void shutdown();
 }

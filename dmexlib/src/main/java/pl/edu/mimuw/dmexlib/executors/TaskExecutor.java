@@ -126,6 +126,11 @@ public class TaskExecutor implements IExecutor {
     public <Result> IResultType<Result> execute(Algorithm<Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return algo.execute(ctx);
     }
+    
+    @Override
+    public void shutdown() {
+        getExecService().shutdownNow();
+    }
 
     protected <R> FutureResultType<R> createTask(final Algorithm<R> algo, final IExecutionContext ctx) {
         return new FutureResultType(getExecService().submit(
@@ -197,4 +202,5 @@ public class TaskExecutor implements IExecutor {
     
     private ExecutorService execService;
     private int workersNumber;
+
 }

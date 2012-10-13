@@ -48,5 +48,8 @@ public class SequentialExecutor implements IExecutor {
     public <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return execute((Algorithm<R>)algo, ctx);
     }
+
+    @Override
+    public void shutdown() {}
     
 }
