@@ -4,35 +4,37 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  *
  * @author matek
  */
-public abstract class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>, CollectionType extends Collection<Result>>
-        extends BinaryNode<CollectionType, Algorithm<Iterable<Element>>, Algorithm<Operation>> {
+public class TransformNode<Result, Element, Operation extends ITransformOperation<Result, Element>>
+        extends BinaryNode<List<Result>, Algorithm<List<Element>>, Algorithm<Operation>> {
     
-    public TransformNode(Algorithm<Iterable<Element>> left, Algorithm<Operation> right) {
+    public TransformNode(Algorithm<List<Element>> left, Algorithm<Operation> right) {
         super(left, right);
     }
     
     @Override
-    public ResultType<CollectionType> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public IResultType<List<Result>> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
-        ResultType<Iterable<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
+        IResultType<List<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
         if (!aResult.isOk()) {
             return new ResultType<>(null, false);
         }
         
-        ResultType<Operation> bResult = ctx.getExecutor().execute(getRight(), ctx);
+        IResultType<Operation> bResult = ctx.getExecutor().execute(getRight(), ctx);
         if (!bResult.isOk()) {
             aResult.cancel(true);
             return new ResultType<>(null, false);
@@ -44,7 +46,7 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
 
         // Do sequential algorithm
         boolean ok = true;
-        CollectionType resultElements = createNewCollection();
+        List<Result> resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(elements.next());
             if (res.isOk()) {
@@ -58,9 +60,11 @@ public abstract class TransformNode<Result, Element, Operation extends ITransfor
     }
     
     @Override
-    public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public IResultType<List<Result>> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
     
-    public abstract CollectionType createNewCollection();
+    public List<Result> createNewCollection() {
+        return new ArrayList<>();
+    }
 }

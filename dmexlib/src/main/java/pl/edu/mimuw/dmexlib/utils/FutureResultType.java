@@ -2,12 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package pl.edu.mimuw.dmexlib;
+package pl.edu.mimuw.dmexlib.utils;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import pl.edu.mimuw.dmexlib.IResultType;
 
 /**
  *
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class FutureResultType<Result> implements IResultType<Result> {
 
-    public FutureResultType(Future<ResultType<Result>> task) {
+    public FutureResultType(Future<IResultType<Result>> task) {
         this.task = task;
     }
 
@@ -37,7 +38,7 @@ public class FutureResultType<Result> implements IResultType<Result> {
     @Override
     public boolean isOk() {
         try {
-            ResultType<Result> res = getTask().get();
+            IResultType<Result> res = getTask().get();
             return res.isOk();
         } catch (InterruptedException | ExecutionException e) {
             return false;
@@ -46,18 +47,18 @@ public class FutureResultType<Result> implements IResultType<Result> {
 
     @Override
     public Result get() throws InterruptedException, ExecutionException {
-        ResultType<Result> res = getTask().get();
+        IResultType<Result> res = getTask().get();
         return res.get();
     }
 
     @Override
     public Result get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        ResultType<Result> res = getTask().get(timeout, unit);
+        IResultType<Result> res = getTask().get(timeout, unit);
         return res.get();
     }
 
-    protected Future<ResultType<Result>> getTask() {
+    protected Future<IResultType<Result>> getTask() {
         return task;
     }
-    private Future<ResultType<Result>> task;
+    private Future<IResultType<Result>> task;
 }

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package pl.edu.mimuw.dmexlib.executors;
+package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 
@@ -10,9 +10,9 @@ import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
  *
  * @author matek
  */
-public abstract class OptimizingExecutor implements IExecutor {
-
-    public OptimizingExecutor(ITreeOptimizer treeOptimizer) {
+public abstract class OptimizingExecutionContext implements IExecutionContext {
+    
+    public OptimizingExecutionContext(ITreeOptimizer treeOptimizer) {
         this.optimizer = treeOptimizer;
     }
 

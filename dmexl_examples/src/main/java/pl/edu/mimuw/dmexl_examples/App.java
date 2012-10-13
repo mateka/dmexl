@@ -2,8 +2,10 @@ package pl.edu.mimuw.dmexl_examples;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.utils.ResultType;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
@@ -20,12 +22,14 @@ public class App
 {
     public static void main( String[] args ) throws InterruptedException, ExecutionException
     {
+        System.out.println("started 4");
+        
         IExecutionContext e = new SimpleSequentialExecutionContext();
         
-        IExecutionContext t = new TaskExecutionContext();
+        IExecutionContext t = new TaskExecutionContext(4);
         
         List<Integer> is = new ArrayList<>();
-        for(int i=0;i<10000000; ++i) is.add(i);
+        for(int i=0;i<1000; ++i) is.add(i);
         
         // Sum all elements
         Algorithm<Integer> sumAlg = I(accumulate(
@@ -35,34 +39,42 @@ public class App
                 0
         ));
         // SumOp always succeeds
-        int sum = e.execute(sumAlg).get();
-        
-        System.out.println("The sum is: " + sum);
-        
-        // mul2 all elements
-        Algorithm<? extends Collection<Integer>> mulAlg = transform(transform(is, new TwoMulOp()), new TwoMulOp());
-        
         
         long start2 = System.nanoTime();
-        Collection<Integer> l_ = t.execute(mulAlg).get();
+        int sum2 = t.execute(sumAlg).get();
         long end2 = System.nanoTime();
-        Iterator<Integer> it_=l_.iterator();
-        while(it_.hasNext()) System.out.print(it_.next() +",");
-        System.out.println();
         
         long start1 = System.nanoTime();
-        Collection<Integer> l = e.execute(mulAlg).get();
+        int sum = e.execute(sumAlg).get();
         long end1 = System.nanoTime();
-        Iterator<Integer> it=l.iterator();
-        while(it.hasNext()) System.out.print(it.next() +",");
-        System.out.println();
         
+        System.out.println("4 The sum is: " + sum + " concrsum: " + sum2);
         
-        System.out.println("Seq: " + (end1-start1)/ 100000000.0 + " tasks: " + (end2-start2) / 100000000.0);
+        System.out.println("Seq: " + (end1-start1)/ 1000000000.0 + " tasks: " + (end2-start2) / 1000000000.0);
+        
+        // mul2 all elements
+//        Algorithm<? extends List<Integer>> mulAlg = transform(transform(is, new TwoMulOp()), new TwoMulOp());
+//        
+//        long start2 = System.nanoTime();
+//        List<Integer> l_ = t.execute(mulAlg).get();
+//        long end2 = System.nanoTime();
+//        Iterator<Integer> it_=l_.iterator();
+//        for(int i=0; i<10 && it_.hasNext(); ++i) System.out.print(it_.next() +";");
+//        System.out.println();
+//        
+//        long start1 = System.nanoTime();
+//        List<Integer> l = e.execute(mulAlg).get();
+//        long end1 = System.nanoTime();
+//        Iterator<Integer> it=l.iterator();
+//        for(int i=0; i<10 && it.hasNext(); ++i) System.out.print(it.next() +",");
+//        System.out.println();
+//        
+//        
+//        System.out.println("Seq: " + (end1-start1)/ 1000000000.0 + " tasks: " + (end2-start2) / 1000000000.0);
         
         // Filter odd elements
-//        Algorithm<? extends Collection<Integer>> removeOddAlg = filter(is, new IsEvenOp());
-//        Collection<Integer> ev = e.execute(removeOddAlg).get();
+//        Algorithm<? extends List<Integer>> removeOddAlg = filter(is, new IsEvenOp());
+//        List<Integer> ev = e.execute(removeOddAlg).get();
 //        Iterator<Integer> it2=ev.iterator();
 //        while(it2.hasNext()) System.out.print(it2.next() +",");
 //        System.out.println();
@@ -83,8 +95,16 @@ public class App
     private static class SumOp implements IAccumulateOperation<Integer, Integer> {
 
         @Override
+        public ResultType<Integer> invoke(Integer arg) {
+            return new ResultType<>(arg);
+        }
+        
+        @Override
         public ResultType<Integer> invoke(Integer left, Integer right) {
             int r = left + right;
+            try {
+                for(int i=0;i<50;++i)Thread.sleep(1);
+            } catch (InterruptedException ex) {}
             return new ResultType<>(r);
         }
         
@@ -94,6 +114,9 @@ public class App
 
         @Override
         public ResultType<Integer> invoke(Integer arg) {
+//            try {
+//                for(int i=0;i<10;++i)Thread.sleep(1);
+//            } catch (InterruptedException ex) {}
             return new ResultType<>(2 * arg);
         }
         

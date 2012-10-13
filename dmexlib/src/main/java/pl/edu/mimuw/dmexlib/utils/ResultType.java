@@ -2,11 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package pl.edu.mimuw.dmexlib;
+package pl.edu.mimuw.dmexlib.utils;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import pl.edu.mimuw.dmexlib.IResultType;
 
 /**
  *

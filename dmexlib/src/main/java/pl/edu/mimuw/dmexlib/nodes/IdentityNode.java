@@ -5,8 +5,9 @@
 package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.concurrent.ExecutionException;
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
+import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  *
@@ -19,12 +20,12 @@ public class IdentityNode<Type> extends UnaryNode<Type, Type> {
     }
 
     @Override
-    public ResultType<Type> execute(IExecutionContext ctx) {
+    public IResultType<Type> execute(IExecutionContext ctx) {
         return new ResultType<>(getArgument());
     }
 
     @Override
-    public ResultType<Type> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public IResultType<Type> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
 

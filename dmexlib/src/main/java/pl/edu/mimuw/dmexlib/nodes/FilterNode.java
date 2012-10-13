@@ -4,35 +4,37 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
+import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  *
  * @author matek
  */
-public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, CollectionType extends Collection<Type>>
-        extends BinaryNode<CollectionType, Algorithm<Iterable<Type>>, Algorithm<Filter>> {
+public class FilterNode<Type, Filter extends IFilterOperation<Type>>
+        extends BinaryNode<List<Type>, Algorithm<List<Type>>, Algorithm<Filter>> {
 
-    public FilterNode(Algorithm<Iterable<Type>> elements, Algorithm<Filter> filter) {
+    public FilterNode(Algorithm<List<Type>> elements, Algorithm<Filter> filter) {
         super(elements, filter);
     }
 
     @Override
-    public ResultType<CollectionType> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public IResultType<List<Type>> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
-        ResultType<Iterable<Type>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
+        IResultType<List<Type>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
         if (!aResult.isOk()) {
             return new ResultType<>(null, false);
         }
 
-        ResultType<Filter> bResult = ctx.getExecutor().execute(getRight(), ctx);
+        IResultType<Filter> bResult = ctx.getExecutor().execute(getRight(), ctx);
         if (!bResult.isOk()) {
             aResult.cancel(true);
             return new ResultType<>(null, false);
@@ -43,7 +45,7 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
         Filter op = bResult.get();
 
         // Do sequential algorithm
-        CollectionType resultElements = createNewCollection();
+        List<Type> resultElements = createNewCollection();
         while (elements.hasNext()) {
             Type e = elements.next();
             if (op.invoke(e)) {
@@ -55,9 +57,11 @@ public abstract class FilterNode<Type, Filter extends IFilterOperation<Type>, Co
     }
 
     @Override
-    public ResultType<CollectionType> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public IResultType<List<Type>> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
 
-    public abstract CollectionType createNewCollection();
+    public List<Type> createNewCollection() {
+        return new ArrayList<>();
+    }
 }

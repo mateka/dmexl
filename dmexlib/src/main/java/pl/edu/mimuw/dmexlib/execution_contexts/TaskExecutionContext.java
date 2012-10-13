@@ -4,26 +4,33 @@
  */
 package pl.edu.mimuw.dmexlib.execution_contexts;
 
+import java.util.List;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.TaskExecutor;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 import pl.edu.mimuw.dmexlib.optimizers.NoOpOptimizer;
 
 /**
  *
  * @author matek
  */
-public class TaskExecutionContext implements IExecutionContext {
+public class TaskExecutionContext extends OptimizingExecutionContext {
 
-    public TaskExecutionContext() {
-        this.executor = new TaskExecutor(new NoOpOptimizer());
+    public TaskExecutionContext(int nThreads) {
+        this(new NoOpOptimizer(), nThreads);
+    }
+    
+    public TaskExecutionContext(ITreeOptimizer treeOptimizer, int nThreads) {
+        super(treeOptimizer);
+        this.executor = new TaskExecutor(nThreads);
     }
     @Override
-    public <Result> ResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
-        return algo.accept(this);
+    public <Result> IResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
+        return getOptimizer().optimize(algo).accept(this);
     }
 
     @Override
@@ -32,7 +39,7 @@ public class TaskExecutionContext implements IExecutionContext {
     }
 
     @Override
-    public <T> Iterator<T> iterator(Iterable<T> i) {
+    public <T> Iterator<T> iterator(List<T> i) {
         return i.iterator();
     }
     

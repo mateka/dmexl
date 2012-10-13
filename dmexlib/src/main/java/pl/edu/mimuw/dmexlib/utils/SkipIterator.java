@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package pl.edu.mimuw.dmexlib;
+package pl.edu.mimuw.dmexlib.utils;
 
 import java.util.Iterator;
 
@@ -12,18 +12,31 @@ import java.util.Iterator;
  */
 public class SkipIterator<E> implements Iterator<E> {
 
-    public SkipIterator(Iterable<E> base, int start, int skip) {
+    public SkipIterator(Iterator<E> base, int start, int skip) {
         if (skip < start) {
             throw new IllegalArgumentException("skip < start");
         }
 
-        this.current = base.iterator();
+        this.current = base;
         this.skip = skip-1;
 
         for (int i = 0; i < start && current.hasNext(); ++i) {
             current.next();
         }
     }
+    // TODO
+//    public SkipIterator(SkipIterator<E> base, int start, int skip) {
+//        if (skip < start) {
+//            throw new IllegalArgumentException("skip < start");
+//        }
+//
+//        this.current = base.current;
+//        this.skip = skip-1 + base.skip;
+//
+//        for (int i = 0; i < start && current.hasNext(); ++i) {
+//            current.next();
+//        }
+//    }
 
     @Override
     public boolean hasNext() {

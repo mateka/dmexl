@@ -4,6 +4,7 @@
  */
 package pl.edu.mimuw.dmexlib;
 
+import pl.edu.mimuw.dmexlib.utils.SkipIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,11 +31,11 @@ public class TestSkipIterator extends TestCase {
 //    }
     public void testCreate() {
         final List<Integer> l1 = generateList(1);
-        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1, 0, 0);
+        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1.iterator(), 0, 0);
         
         try {
             final List<Integer> l2 = generateList(1);
-            SkipIterator<Integer> skipi2 = new SkipIterator<>(l2, 2, 1);
+            SkipIterator<Integer> skipi2 = new SkipIterator<>(l2.iterator(), 2, 1);
             fail("Constructor should throw for skip < start");
         } catch (IllegalArgumentException ignore) {
         }
@@ -43,12 +44,12 @@ public class TestSkipIterator extends TestCase {
     public void testHasNext() {
         // SkipIterator starting after collection should not have next
         final List<Integer> l1 = generateList(2);
-        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1, 3, 3);
+        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1.iterator(), 3, 3);
         assertFalse(skipi1.hasNext());
 
         // Skip iterator in collection should have next
         final List<Integer> l2 = generateList(4);
-        SkipIterator<Integer> skipi2 = new SkipIterator<>(l2, 2, 3);
+        SkipIterator<Integer> skipi2 = new SkipIterator<>(l2.iterator(), 2, 3);
         assertTrue(skipi2.hasNext());
         skipi2.next();
         assertFalse(skipi2.hasNext());
@@ -60,7 +61,7 @@ public class TestSkipIterator extends TestCase {
         final int skip = 3;
         
         final List<Integer> list = generateList(15);
-        SkipIterator<Integer> skipi = new SkipIterator<>(list, current-1, skip);
+        SkipIterator<Integer> skipi = new SkipIterator<>(list.iterator(), current-1, skip);
         
         while (skipi.hasNext()) {
             assertEquals(current, (int) skipi.next());
@@ -75,7 +76,7 @@ public class TestSkipIterator extends TestCase {
         final int parts = 5;
         List<SkipIterator<Integer>> skipis = new ArrayList<>(parts);
         for (int i = 0; i < parts; ++i) {
-            skipis.add(new SkipIterator<>(list0, i, parts));
+            skipis.add(new SkipIterator<>(list0.iterator(), i, parts));
         }
         
         List<Integer> result = new ArrayList<>(25);
@@ -91,7 +92,7 @@ public class TestSkipIterator extends TestCase {
     
     public void testRemove() {
         List<Float> list = new ArrayList<>();
-        SkipIterator<Float> skipi = new SkipIterator<>(list, 0, 1);
+        SkipIterator<Float> skipi = new SkipIterator<>(list.iterator(), 0, 1);
         try {
             skipi.remove();
             fail("SkipIterator.remove should throw");

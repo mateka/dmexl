@@ -4,7 +4,7 @@
  */
 package pl.edu.mimuw.dmexlib.nodes.operations;
 
-import pl.edu.mimuw.dmexlib.ResultType;
+import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  * Interface for operation invoked by transform algorithms

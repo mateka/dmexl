@@ -5,37 +5,33 @@
 package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.ResultType;
-import pl.edu.mimuw.dmexlib.SkipIterator;
+import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 import pl.edu.mimuw.dmexlib.optimizers.NoOpOptimizer;
 
 /**
  *
  * @author matek
  */
-public class SimpleSequentialExecutionContext implements IExecutionContext {
+public class SimpleSequentialExecutionContext extends OptimizingExecutionContext {
 
     public SimpleSequentialExecutionContext() {
-        this.executor = new SequentialExecutor(new NoOpOptimizer());
+        this(new NoOpOptimizer());
     }
 
-    public SimpleSequentialExecutionContext(SequentialExecutor executor, int start, int skip) {
-        this.executor = executor;
-        this.start = start;
-        this.skip = skip;
+    public SimpleSequentialExecutionContext(ITreeOptimizer treeOptimizer) {
+        super(treeOptimizer);
+        this.executor = new SequentialExecutor();
     }
 
     @Override
-    public <T> Iterator<T> iterator(Iterable<T> coll) {
-        if (null != skip) {
-            return new SkipIterator(coll, this.start, this.skip);
-        } else {
-            return coll.iterator();
-        }
+    public <T> Iterator<T> iterator(List<T> coll) {
+        return coll.iterator();
     }
 
     @Override
@@ -44,10 +40,8 @@ public class SimpleSequentialExecutionContext implements IExecutionContext {
     }
 
     @Override
-    public <Result> ResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
-        return algo.accept(this);
+    public <Result> IResultType<Result> execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
+        return getOptimizer().optimize(algo).accept(this);
     }
     private SequentialExecutor executor;
-    private Integer start;
-    private Integer skip;
 }
