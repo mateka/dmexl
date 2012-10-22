@@ -35,11 +35,15 @@ import pl.edu.mimuw.dmexlib.utils.TreeFutureResultType;
 public class TaskExecutor implements IExecutor {
 
     public TaskExecutor(int nThreads) {
+        if(nThreads < 2) {
+            throw new IllegalArgumentException("nThreads < 2");
+        }
+            
         workersNumber = nThreads;
         execService = Executors.newFixedThreadPool(workersNumber);
     }
 
-    public ExecutorService getExecService() {
+    public synchronized ExecutorService getExecService() {
         return execService;
     }
 
@@ -116,7 +120,7 @@ public class TaskExecutor implements IExecutor {
         }
 
         List<E> coll = aPart.get();
-        int threshold = Math.max(getWorkersNumber(), coll.size()/(getWorkersNumber()));
+        int threshold = Math.max(getWorkersNumber(), coll.size()/getWorkersNumber());
         IResultType<R> res = accumulateInSplit(coll, bPart.get(), cPart.get(), ctx, threshold);
 
         return res;
@@ -143,18 +147,16 @@ public class TaskExecutor implements IExecutor {
     }
     
     // TODO make copy of zero
-    private <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> accumulateInSplit(final List<E> coll, final O op, R zero, final IExecutionContext ctx, final int splitThreshold) throws InterruptedException, ExecutionException {
+    private <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> accumulateInSplit(final List<E> coll, final O op, final R zero, final IExecutionContext ctx, final int splitThreshold) throws InterruptedException, ExecutionException {
         if (coll.size() > splitThreshold) {
             final List<E> left = coll.subList(0, coll.size()/2);
             final List<E> right = coll.subList(coll.size()/2, coll.size());
             
-            final R lzero = zero;
-            final R rzero = zero;
             final IResultType<R> lresult = new FutureResultType(getExecService().submit(
                     new Callable<IResultType<R>>() {
                         @Override
                         public IResultType<R> call() throws InterruptedException, ExecutionException {
-                            IResultType<R> r = accumulateInSplit(left, op, lzero, ctx, splitThreshold);
+                            IResultType<R> r = accumulateInSplit(left, op, zero, ctx, splitThreshold);
                             return r;
                         }
                     }));
@@ -162,7 +164,7 @@ public class TaskExecutor implements IExecutor {
                     new Callable<IResultType<R>>() {
                         @Override
                         public IResultType<R> call() throws InterruptedException, ExecutionException {
-                            IResultType<R> r = accumulateInSplit(right, op, rzero, ctx, splitThreshold);
+                            IResultType<R> r = accumulateInSplit(right, op, zero, ctx, splitThreshold);
                             return r;
                         }
                     }));
@@ -176,23 +178,17 @@ public class TaskExecutor implements IExecutor {
                         }
                     }), lresult, rresult);
         } else {
-            boolean ok = true;
             Iterator<E> elements = coll.iterator();
-            while (ok && elements.hasNext()) {
+            ResultType<R> result = new ResultType<>(zero, true);
+            while (result.isOk() && elements.hasNext()) {
                 ResultType<R> argToResult = op.invoke(elements.next());
                 if (argToResult.isOk()) {
-                    ResultType<R> res = op.invoke(zero, argToResult.get());
-                    if (res.isOk()) {
-                        zero = res.get();
-                    } else {
-                        ok = false;
-                    }
+                    result = op.invoke(result.get(), argToResult.get());
                 } else {
-                    ok = false;
+                    result = new ResultType<>(null, false);
                 }
             }
-            // TODO make copy of zero?
-            return new ResultType<>(zero, ok);
+            return result;
         }
     }
     

@@ -49,11 +49,11 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
         List<Result> resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
             ResultType<Result> res = op.invoke(elements.next());
-            if (res.isOk()) {
+            //if (res.isOk()) {
                 resultElements.add(res.get());
-            } else {
-                ok = false;
-            }
+           // } else {
+           //     ok = false;
+            //}
         }
         
         return new ResultType<>(resultElements, ok);

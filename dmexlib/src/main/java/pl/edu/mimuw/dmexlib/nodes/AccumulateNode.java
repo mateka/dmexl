@@ -4,8 +4,8 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.IResultType;
@@ -52,22 +52,17 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
         Result zero = cResult.get();
 
         // Do sequential accumulation
-        boolean ok = true;
-        while (ok && elements.hasNext()) {
+        ResultType<Result> result = new ResultType<>(zero, true);
+        while (result.isOk() && elements.hasNext()) {
             ResultType<Result> argToResult = op.invoke(elements.next());
-            if (argToResult.isOk()) {
-                ResultType<Result> res = op.invoke(zero, argToResult.get());
-                if (res.isOk()) {
-                    zero = res.get();
-                } else {
-                    ok = false;
-                }
-            } else {
-                ok = false;
-            }
+           // if (argToResult.isOk()) {
+                result = op.invoke(result.get(), argToResult.get());
+           // } else {
+          //      ok = false;
+           // }
         }
         // TODO make copy of zero?
-        return new ResultType<>(zero, ok);
+        return result;
     }
 
     @Override
