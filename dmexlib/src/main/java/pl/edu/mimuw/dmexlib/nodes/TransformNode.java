@@ -5,14 +5,12 @@
 package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
-import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  *
@@ -26,41 +24,27 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
     }
     
     @Override
-    public IResultType<List<Result>> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
-        IResultType<List<Element>> aResult = ctx.getExecutor().execute(getLeft(), ctx);
-        if (!aResult.isOk()) {
-            return new ResultType<>(null, false);
-        }
-        
-        IResultType<Operation> bResult = ctx.getExecutor().execute(getRight(), ctx);
-        if (!bResult.isOk()) {
-            aResult.cancel(true);
-            return new ResultType<>(null, false);
-        }
+        List<Element> aResult = ctx.getExecutor().execute(getLeft(), ctx);
+        Operation op = ctx.getExecutor().execute(getRight(), ctx);
 
         // Get data for accumulate algorithm
-        Iterator<Element> elements = ctx.iterator(aResult.get());
-        Operation op = bResult.get();
+        Iterator<Element> elements = ctx.iterator(aResult);
 
         // Do sequential algorithm
         boolean ok = true;
         List<Result> resultElements = createNewCollection();
         while (ok && elements.hasNext()) {
-            ResultType<Result> res = op.invoke(elements.next());
-            //if (res.isOk()) {
-                resultElements.add(res.get());
-           // } else {
-           //     ok = false;
-            //}
+            resultElements.add(op.invoke(elements.next()));
         }
         
-        return new ResultType<>(resultElements, ok);
+        return resultElements;
     }
     
     @Override
-    public IResultType<List<Result>> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
     

@@ -8,10 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
-import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  *
@@ -25,48 +23,26 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
     }
 
     @Override
-    public IResultType<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public Result execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
-        IResultType<List<Element>> aResult = ctx.getExecutor().execute(getA(), ctx);
-        if (!aResult.isOk()) {
-            return new ResultType<>(null, false);
-        }
-
-        IResultType<Operation> bResult = ctx.getExecutor().execute(getB(), ctx);
-        if (!bResult.isOk()) {
-            aResult.cancel(true);
-            return new ResultType<>(null, false);
-        }
-
-        IResultType<Result> cResult = ctx.getExecutor().execute(getC(), ctx);
-        if (!cResult.isOk()) {
-            aResult.cancel(true);
-            bResult.cancel(true);
-            return new ResultType<>(null, false);
-        }
+        List<Element> aResult = ctx.getExecutor().execute(getA(), ctx);
+        Operation op = ctx.getExecutor().execute(getB(), ctx);
+        Result zero = ctx.getExecutor().execute(getC(), ctx);
 
         // Get data for accumulate algorithm
-        Iterator<Element> elements = ctx.iterator(aResult.get());
-        Operation op = bResult.get();
-        Result zero = cResult.get();
-
+        Iterator<Element> elements = ctx.iterator(aResult);
         // Do sequential accumulation
-        ResultType<Result> result = new ResultType<>(zero, true);
-        while (result.isOk() && elements.hasNext()) {
-            ResultType<Result> argToResult = op.invoke(elements.next());
-           // if (argToResult.isOk()) {
-                result = op.invoke(result.get(), argToResult.get());
-           // } else {
-          //      ok = false;
-           // }
+        Result result = zero;
+        while (elements.hasNext()) {
+            result = op.invoke(result, op.invoke(elements.next()));
         }
         // TODO make copy of zero?
         return result;
     }
 
     @Override
-    public IResultType<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public Result accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return ctx.getExecutor().execute(this, ctx);
     }
 }

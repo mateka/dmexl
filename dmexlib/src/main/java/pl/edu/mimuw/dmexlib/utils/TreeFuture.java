@@ -8,16 +8,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import pl.edu.mimuw.dmexlib.IResultType;
 
 /**
  *
  * @author matek
  */
-public class TreeFutureResultType<T> extends FutureResultType<T> {
+public class TreeFuture<T> implements Future<T> {
 
-    public TreeFutureResultType(Future<IResultType<T>> task, IResultType<T> left, IResultType<T> right) {
-        super(task);
+    public TreeFuture(Future<T> task, Future<T> left, Future<T> right) {
+        this.node = task;
         this.left = left;
         this.right = right;
     }
@@ -27,29 +26,30 @@ public class TreeFutureResultType<T> extends FutureResultType<T> {
     public boolean cancel(boolean mayInterruptIfRunning) {
         left.cancel(mayInterruptIfRunning);
         right.cancel(mayInterruptIfRunning);
-        return super.cancel(mayInterruptIfRunning);
+        return node.cancel(mayInterruptIfRunning);
     }
 
     @Override
     public boolean isCancelled() {
-        return left.isCancelled() && right.isCancelled() && super.isCancelled();
+        return left.isCancelled() && right.isCancelled() && node.isCancelled();
     }
 
     @Override
     public boolean isDone() {
-        return left.isDone() && right.isDone() && super.isDone();
+        return left.isDone() && right.isDone() && node.isDone();
     }
 
     @Override
     public T get() throws InterruptedException, ExecutionException {
-        return super.get();
+        return node.get();
     }
 
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return super.get(timeout, unit);
+        return node.get(timeout, unit);
     }
     
-    private IResultType<T> left;
-    private IResultType<T> right;
+    private Future<T> node;
+    private Future<T> left;
+    private Future<T> right;
 }

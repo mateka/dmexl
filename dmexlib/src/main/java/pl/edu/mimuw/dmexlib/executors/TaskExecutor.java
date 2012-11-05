@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.IResultType;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
+import pl.edu.mimuw.dmexlib.executors.tasks.PrioritizedCompletionService;
+import pl.edu.mimuw.dmexlib.executors.tasks.PriorityExecutorService;
 import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
 import pl.edu.mimuw.dmexlib.nodes.FilterNode;
 import pl.edu.mimuw.dmexlib.nodes.IdentityNode;
@@ -24,9 +22,6 @@ import pl.edu.mimuw.dmexlib.nodes.TransformNode;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
-import pl.edu.mimuw.dmexlib.utils.FutureResultType;
-import pl.edu.mimuw.dmexlib.utils.ResultType;
-import pl.edu.mimuw.dmexlib.utils.TreeFutureResultType;
 
 /**
  *
@@ -35,168 +30,186 @@ import pl.edu.mimuw.dmexlib.utils.TreeFutureResultType;
 public class TaskExecutor implements IExecutor {
 
     public TaskExecutor(int nThreads) {
-        if(nThreads < 2) {
+        if (nThreads < 2) {
             throw new IllegalArgumentException("nThreads < 2");
         }
-            
+
         workersNumber = nThreads;
-        execService = Executors.newFixedThreadPool(workersNumber);
+        execService = new PriorityExecutorService(workersNumber);
     }
 
-    public synchronized ExecutorService getExecService() {
+    public PriorityExecutorService getExecService() {
         return execService;
     }
 
     @Override
-    public <T> IResultType<T> execute(IdentityNode<T> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
-        return algo.execute(ctx);
+    public <T> T execute(IdentityNode<T> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        try {
+            getExecService().incrementPriority();
+            return algo.execute(ctx);
+        } finally {
+            getExecService().decrementPriority();
+        }
     }
 
     @Override
-    public <T, F extends IFilterOperation<T>> IResultType<List<T>> execute(FilterNode<T, F> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public <T, F extends IFilterOperation<T>> List<T> execute(FilterNode<T, F> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public <R, E, O extends ITransformOperation<R, E>> IResultType<List<R>> execute(TransformNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
-        FutureResultType<List<E>> left = createTask(algo.getLeft(), ctx);
-        FutureResultType<O> right = createTask(algo.getRight(), ctx);
+    public <R, E, O extends ITransformOperation<R, E>> List<R> execute(TransformNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        List<Future<R>> tasks = null;
+        try {
+            getExecService().incrementPriority();
 
-        if (!left.isOk() || !right.isOk()) {
-            left.cancel(true);
-            right.cancel(true);
-            return new ResultType<>(null, false);
-        }
+            Future<List<E>> left = createTask(algo.getLeft(), ctx);
+            Future<O> right = createTask(algo.getRight(), ctx);
 
-        // Get data for accumulate algorithm
-        Iterator<E> elements = ctx.iterator(left.get());
-        O op = right.get();
+            // Get data for accumulate algorithm
+            Iterator<E> elements = ctx.iterator(left.get());
+            O op = right.get();
 
-        // Submit algorithm's tasks
-        int size = 0;
-        CompletionService<ResultType<R>> ecs = new ExecutorCompletionService<>(getExecService());
-        List<Future<ResultType<R>>> tasks = new LinkedList<>();
-        while (elements.hasNext()) {
-            final E current = elements.next();
-            final O fun = op;
-            ++size;
+            // Submit algorithm's tasks
+            int size = 0;
+            CompletionService<R> ecs = new PrioritizedCompletionService<>(getExecService());
+            tasks = new LinkedList<>();
+            while (elements.hasNext()) {
+                final E current = elements.next();
+                final O fun = op;
+                ++size;
 
-            tasks.add(ecs.submit(new Callable<ResultType<R>>() {
-                @Override
-                public ResultType<R> call() throws InterruptedException, ExecutionException {
-                    return fun.invoke(current);
-                }
-            }));
-        }
-        // Consume tasks' results
-        boolean ok = true;
-        List<R> resultElements = algo.createNewCollection();
-        for (int i = 0; i < size && ok; ++i) {
-            ResultType<R> res = ecs.take().get();
-            if (res.isOk()) {
-                resultElements.add(res.get());
-            } else {
-                ok = false;
+                tasks.add(ecs.submit(new Callable<R>() {
+                    @Override
+                    public R call() throws InterruptedException, ExecutionException {
+                        return fun.invoke(current);
+                    }
+                }));
+            }
+            // Consume tasks' results
+            List<R> resultElements = algo.createNewCollection();
+            for (int i = 0; i < size; ++i) {
+                resultElements.add(ecs.take().get());
+            }
+            return resultElements;
+        } finally {
+            getExecService().decrementPriority();
+
+            if (null != tasks) {
                 for (Future f : tasks) {
                     f.cancel(true);
                 }
             }
         }
-
-        return new ResultType<>(resultElements, ok);
     }
 
     @Override
-    public <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
-        FutureResultType<List<E>> aPart = createTask(algo.getA(), ctx);
-        FutureResultType<O> bPart = createTask(algo.getB(), ctx);
-        FutureResultType<R> cPart = createTask(algo.getC(), ctx);
+    public <R, E, O extends IAccumulateOperation<R, E>> R execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
+        try {
+            getExecService().incrementPriority();
 
-        if (!aPart.isOk() || !bPart.isOk() || !cPart.isOk()) {
-            aPart.cancel(true);
-            bPart.cancel(true);
-            cPart.cancel(true);
-            return new ResultType<>(null, false);
+            //Future<List<E>> aPart = createTask(algo.getA(), ctx);
+//            Future<O> bPart = createTask(algo.getB(), ctx);
+//            Future<R> cPart = createTask(algo.getC(), ctx);
+
+            List<E> coll = algo.getA().accept(ctx);//aPart.get();
+            int threshold = Math.max(getWorkersNumber(), coll.size() / getWorkersNumber());
+            //System.out.println("accumulate");
+            //return accumulateInSplit(coll, bPart.get(), cPart.get(), ctx, threshold);
+            return accumulateInSplit(coll, algo.getB().accept(ctx), algo.getC().accept(ctx), ctx, threshold);
+        } finally {
+            getExecService().decrementPriority();
         }
-
-        List<E> coll = aPart.get();
-        int threshold = Math.max(getWorkersNumber(), coll.size()/getWorkersNumber());
-        IResultType<R> res = accumulateInSplit(coll, bPart.get(), cPart.get(), ctx, threshold);
-
-        return res;
     }
 
     @Override
-    public <Result> IResultType<Result> execute(Algorithm<Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public <Result> Result execute(Algorithm< Result> algo, IExecutionContext ctx) throws InterruptedException, ExecutionException {
         return algo.execute(ctx);
     }
-    
+
     @Override
     public void shutdown() {
         getExecService().shutdownNow();
     }
 
-    protected <R> FutureResultType<R> createTask(final Algorithm<R> algo, final IExecutionContext ctx) {
-        return new FutureResultType(getExecService().submit(
-                new Callable<IResultType<R>>() {
-                    @Override
-                    public IResultType<R> call() throws InterruptedException, ExecutionException {
-                        return algo.accept(ctx);
-                    }
-                }));
+    protected <R> Future<R> createTask(final Algorithm<R> algo, final IExecutionContext ctx) {
+        return getExecService().submit(new Callable<R>() {
+            @Override
+            public R call() throws InterruptedException, ExecutionException {
+                return algo.accept(ctx);
+            }
+        });
     }
-    
-    // TODO make copy of zero
-    private <R, E, O extends IAccumulateOperation<R, E>> IResultType<R> accumulateInSplit(final List<E> coll, final O op, final R zero, final IExecutionContext ctx, final int splitThreshold) throws InterruptedException, ExecutionException {
-        if (coll.size() > splitThreshold) {
-            final List<E> left = coll.subList(0, coll.size()/2);
-            final List<E> right = coll.subList(coll.size()/2, coll.size());
-            
-            final IResultType<R> lresult = new FutureResultType(getExecService().submit(
-                    new Callable<IResultType<R>>() {
-                        @Override
-                        public IResultType<R> call() throws InterruptedException, ExecutionException {
-                            IResultType<R> r = accumulateInSplit(left, op, zero, ctx, splitThreshold);
-                            return r;
-                        }
-                    }));
-            final IResultType<R> rresult = new FutureResultType(getExecService().submit(
-                    new Callable<IResultType<R>>() {
-                        @Override
-                        public IResultType<R> call() throws InterruptedException, ExecutionException {
-                            IResultType<R> r = accumulateInSplit(right, op, zero, ctx, splitThreshold);
-                            return r;
-                        }
-                    }));
 
-            return new TreeFutureResultType<>(getExecService().submit(
-                    new Callable<IResultType<R>>() {
-                        @Override
-                        public IResultType<R> call() throws InterruptedException, ExecutionException {
-                            IResultType<R> r = op.invoke(lresult.get(), rresult.get());
-                            return r;
-                        }
-                    }), lresult, rresult);
-        } else {
-            Iterator<E> elements = coll.iterator();
-            ResultType<R> result = new ResultType<>(zero, true);
-            while (result.isOk() && elements.hasNext()) {
-                ResultType<R> argToResult = op.invoke(elements.next());
-                if (argToResult.isOk()) {
-                    result = op.invoke(result.get(), argToResult.get());
-                } else {
-                    result = new ResultType<>(null, false);
+    private <R, E, O extends IAccumulateOperation<R, E>> R accumulateInSplit(final List<E> coll, final O op, final R zero, final IExecutionContext ctx, final int splitThreshold) throws InterruptedException, ExecutionException {
+        //System.out.println("accumulate in split");
+        if (coll.size() > splitThreshold) {
+            //System.out.println("split");
+            final List<E> left = coll.subList(0, coll.size() / 2);
+            final List<E> right = coll.subList(coll.size() / 2, coll.size());
+
+            boolean mustDecrement = true;
+            try {
+                getExecService().incrementPriority();
+
+                final Future<R> lresult = getExecService().submit(new Callable<R>() {
+                    @Override
+                    public R call() throws InterruptedException, ExecutionException {
+                        //System.out.println("left");
+                        return accumulateInSplit(left, op, zero, ctx, splitThreshold);
+                    }
+                });
+                final Future<R> rresult = getExecService().submit(new Callable<R>() {
+                    @Override
+                    public R call() throws InterruptedException, ExecutionException {
+                       // System.out.println("right");
+                        return accumulateInSplit(right, op, zero, ctx, splitThreshold);
+                    }
+                });
+
+                getExecService().decrementPriority();
+                mustDecrement = false;
+
+                return getExecService().submit(
+                        new Callable<R>() {
+                            @Override
+                            public R call() throws InterruptedException, ExecutionException {
+                                //System.out.println("join");
+                                R left = null;
+                                try {
+                                    left = lresult.get();
+                                } catch (ExecutionException e) {
+                                    rresult.cancel(true);
+                                    throw e;
+                                }
+                                R right = null;
+                                try {
+                                    right = rresult.get();
+                                } catch (ExecutionException e) {
+                                    throw e;
+                                }
+                                return op.invoke(left, right);
+                            }
+                        }).get();
+            } finally {
+                if (mustDecrement) {
+                    getExecService().decrementPriority();
                 }
+            }
+        } else {
+            //System.out.println("accumulate - seq part");
+            Iterator<E> elements = coll.iterator();
+            R result = zero;
+            while (elements.hasNext()) {
+                result = op.invoke(result, op.invoke(elements.next()));
             }
             return result;
         }
     }
-    
+
     private int getWorkersNumber() {
         return workersNumber;
     }
-    
-    private ExecutorService execService;
+    private PriorityExecutorService execService;
     private int workersNumber;
-
 }

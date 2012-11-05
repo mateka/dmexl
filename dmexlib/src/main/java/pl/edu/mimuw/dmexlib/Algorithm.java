@@ -14,6 +14,6 @@ import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
  */
 public interface Algorithm<Result> {
     // TODO Methods should be public or package private?
-    public IResultType<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException;
-    public IResultType<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException;
+    public Result execute(IExecutionContext ctx) throws InterruptedException, ExecutionException;
+    public Result accept(IExecutionContext ctx) throws InterruptedException, ExecutionException;
 }

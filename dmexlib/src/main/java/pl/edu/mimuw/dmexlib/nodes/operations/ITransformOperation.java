@@ -4,8 +4,6 @@
  */
 package pl.edu.mimuw.dmexlib.nodes.operations;
 
-import pl.edu.mimuw.dmexlib.utils.ResultType;
-
 /**
  * Interface for operation invoked by transform algorithms
  *
@@ -13,5 +11,5 @@ import pl.edu.mimuw.dmexlib.utils.ResultType;
  */
 public interface ITransformOperation<Result, Argument> {
 
-    public ResultType<Result> invoke(Argument arg);
+    public Result invoke(Argument arg);
 }

@@ -10,7 +10,6 @@ import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
-import pl.edu.mimuw.dmexlib.utils.ResultType;
 
 /**
  * Hello world!
@@ -28,7 +27,7 @@ public class App {
             t = new TaskExecutionContext(4);
 
             List<Integer> is = new ArrayList<>();
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 100; ++i) {
                 is.add(i);
             }
 
@@ -41,11 +40,11 @@ public class App {
             // SumOp always succeeds
 
             long start2 = System.nanoTime();
-            float sum2 = t.execute(sumAlg).get();
+            float sum2 = t.execute(sumAlg);
             long end2 = System.nanoTime();
 
             long start1 = System.nanoTime();
-            float sum = e.execute(sumAlg).get();
+            float sum = e.execute(sumAlg);
             long end1 = System.nanoTime();
 
             System.out.println("4 The sum is: " + sum + " concrsum: " + sum2);
@@ -103,12 +102,12 @@ public class App {
     private static class SumOp implements IAccumulateOperation<Float, Float> {
 
         @Override
-        public ResultType<Float> invoke(Float arg) {
-            return new ResultType<>(arg);
+        public Float invoke(Float arg) {
+            return arg;
         }
 
         @Override
-        public ResultType<Float> invoke(Float left, Float right) {
+        public Float invoke(Float left, Float right) {
             float r = left + right;
             try {
                 for (int i = 0; i < 50; ++i) {
@@ -116,18 +115,18 @@ public class App {
                 }
             } catch (InterruptedException ex) {
             }
-            return new ResultType<>(r);
+            return r;
         }
     }
 
     private static class TwoMulOp implements ITransformOperation<Float, Integer> {
 
         @Override
-        public ResultType<Float> invoke(Integer arg) {
+        public Float invoke(Integer arg) {
 //            try {
 //                for(int i=0;i<10;++i)Thread.sleep(1);
 //            } catch (InterruptedException ex) {}
-            return new ResultType<>(2.0f * arg);
+            return 2.0f * arg;
         }
     }
 

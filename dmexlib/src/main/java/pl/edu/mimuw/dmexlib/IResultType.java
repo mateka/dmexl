@@ -11,6 +11,4 @@ import java.util.concurrent.Future;
  * @author matek
  */
 public interface IResultType<Result> extends Future<Result> {
-
-    public boolean isOk();
 }

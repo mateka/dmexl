@@ -4,14 +4,12 @@
  */
 package pl.edu.mimuw.dmexlib.nodes.operations;
 
-import pl.edu.mimuw.dmexlib.utils.ResultType;
-
 /**
  * Interface for operation invoked by accumulate algorithms
  *
  * @author matek
  */
 public interface IAccumulateOperation<Result, Argument> {
-    public ResultType<Result> invoke(Argument arg);
-    public ResultType<Result> invoke(Result left, Result right);
+    public Result invoke(Argument arg);
+    public Result invoke(Result left, Result right);
 }
