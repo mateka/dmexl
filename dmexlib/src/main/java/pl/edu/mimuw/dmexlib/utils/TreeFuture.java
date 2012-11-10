@@ -40,12 +40,12 @@ public class TreeFuture<T> implements Future<T> {
     }
 
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() throws ExecutionException, InterruptedException {
         return node.get();
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(long timeout, TimeUnit unit) throws ExecutionException, TimeoutException, InterruptedException {
         return node.get(timeout, unit);
     }
     

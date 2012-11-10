@@ -6,7 +6,6 @@ package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 
@@ -16,7 +15,7 @@ import pl.edu.mimuw.dmexlib.executors.IExecutor;
  * @author matek
  */
 public interface IExecutionContext {
-    public <Result> Result execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException;
+    public <Result> Result execute(Algorithm<Result> algo) throws Exception;
     public IExecutor getExecutor();
     public <T> Iterator<T> iterator(List<T> i);
 }

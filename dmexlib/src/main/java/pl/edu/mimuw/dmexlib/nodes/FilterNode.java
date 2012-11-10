@@ -7,7 +7,6 @@ package pl.edu.mimuw.dmexlib.nodes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
@@ -24,7 +23,7 @@ public class FilterNode<Type, Filter extends IFilterOperation<Type>>
     }
 
     @Override
-    public List<Type> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Type> execute(IExecutionContext ctx) throws Exception {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         List<Type> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -46,7 +45,7 @@ public class FilterNode<Type, Filter extends IFilterOperation<Type>>
     }
 
     @Override
-    public List<Type> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Type> accept(IExecutionContext ctx) throws Exception {
         return ctx.getExecutor().execute(this, ctx);
     }
 

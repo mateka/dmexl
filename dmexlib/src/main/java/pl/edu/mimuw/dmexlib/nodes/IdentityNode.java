@@ -4,7 +4,6 @@
  */
 package pl.edu.mimuw.dmexlib.nodes;
 
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 
 /**
@@ -23,7 +22,7 @@ public class IdentityNode<Type> extends UnaryNode<Type, Type> {
     }
 
     @Override
-    public Type accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public Type accept(IExecutionContext ctx) throws Exception {
         return ctx.getExecutor().execute(this, ctx);
     }
 

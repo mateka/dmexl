@@ -24,7 +24,7 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
     }
     
     @Override
-    public List<Result> execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Result> execute(IExecutionContext ctx) throws Exception {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         List<Element> aResult = ctx.getExecutor().execute(getLeft(), ctx);
@@ -44,7 +44,7 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
     }
     
     @Override
-    public List<Result> accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public List<Result> accept(IExecutionContext ctx) throws Exception {
         return ctx.getExecutor().execute(this, ctx);
     }
     

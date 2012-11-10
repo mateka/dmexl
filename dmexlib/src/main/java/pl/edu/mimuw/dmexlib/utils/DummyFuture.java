@@ -35,12 +35,12 @@ public class DummyFuture<T> implements Future<T> {
     }
 
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() throws ExecutionException {
         return result;
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(long timeout, TimeUnit unit) throws ExecutionException, TimeoutException {
         return get();
     }
 

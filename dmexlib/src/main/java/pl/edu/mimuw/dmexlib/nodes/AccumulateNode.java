@@ -6,7 +6,6 @@ package pl.edu.mimuw.dmexlib.nodes;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
@@ -23,7 +22,7 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
     }
 
     @Override
-    public Result execute(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public Result execute(IExecutionContext ctx) throws Exception {
         // Calculate results in subtrees. Check for errors to stop calculations
         // as early as possible.
         List<Element> aResult = ctx.getExecutor().execute(getA(), ctx);
@@ -42,7 +41,7 @@ public class AccumulateNode<Result, Element, Operation extends IAccumulateOperat
     }
 
     @Override
-    public Result accept(IExecutionContext ctx) throws InterruptedException, ExecutionException {
+    public Result accept(IExecutionContext ctx) throws Exception {
         return ctx.getExecutor().execute(this, ctx);
     }
 }

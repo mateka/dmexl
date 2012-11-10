@@ -27,7 +27,7 @@ public class App {
             t = new TaskExecutionContext(4);
 
             List<Integer> is = new ArrayList<>();
-            for (int i = 0; i < 100; ++i) {
+            for (int i = 0; i < 10; ++i) {
                 is.add(i);
             }
 
@@ -87,7 +87,7 @@ public class App {
             //        Iterator<Integer> dedit=deduplicated.iterator();
             //        while(dedit.hasNext()) System.out.print(dedit.next() +",");
             //        System.out.println();
-        } catch (InterruptedException | ExecutionException error) {
+        } catch (Exception error) {
             System.out.println(error.toString() + "\n" + error.getMessage());
         } finally {
             if (e != null) {

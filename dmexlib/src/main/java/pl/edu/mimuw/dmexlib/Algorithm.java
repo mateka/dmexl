@@ -4,7 +4,6 @@
  */
 package pl.edu.mimuw.dmexlib;
 
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 
 /**
@@ -14,6 +13,6 @@ import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
  */
 public interface Algorithm<Result> {
     // TODO Methods should be public or package private?
-    public Result execute(IExecutionContext ctx) throws InterruptedException, ExecutionException;
-    public Result accept(IExecutionContext ctx) throws InterruptedException, ExecutionException;
+    public Result execute(IExecutionContext ctx) throws Exception;
+    public Result accept(IExecutionContext ctx) throws Exception;
 }

@@ -6,7 +6,6 @@ package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.TaskExecutor;
@@ -28,7 +27,7 @@ public class TaskExecutionContext extends OptimizingExecutionContext {
         this.executor = new TaskExecutor(nThreads);
     }
     @Override
-    public <Result> Result execute(Algorithm<Result> algo) throws InterruptedException, ExecutionException {
+    public <Result> Result execute(Algorithm<Result> algo) throws Exception {
         return getOptimizer().optimize(algo).accept(this);
     }
 
