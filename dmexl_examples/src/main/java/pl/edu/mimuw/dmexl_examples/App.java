@@ -1,7 +1,6 @@
 package pl.edu.mimuw.dmexl_examples;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
@@ -10,6 +9,8 @@ import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
+import pl.edu.mimuw.dmexlib.optimizers.SimpleOptimizer;
 
 /**
  * Hello world!
@@ -22,18 +23,19 @@ public class App {
         try {
             System.out.println("started 4");
 
-            e = new SimpleSequentialExecutionContext();
+            ITreeOptimizer optimizer = new SimpleOptimizer();
+            e = new SimpleSequentialExecutionContext(optimizer);
 
             t = new TaskExecutionContext(4);
 
             List<Integer> is = new ArrayList<>();
-            for (int i = 0; i < 10; ++i) {
+            for (int i = 0; i < 128; ++i) {
                 is.add(i);
             }
 
             // Sum all elements
             Algorithm<Float> sumAlg = I(accumulate(
-                    transform(is, new TwoMulOp()),
+                    transform(transform(is, new TwoMulOp()), new TwoMulOp2()),
                     //is,
                     new SumOp(),
                     0.0f));
@@ -126,6 +128,14 @@ public class App {
 //            try {
 //                for(int i=0;i<10;++i)Thread.sleep(1);
 //            } catch (InterruptedException ex) {}
+            return 2.0f * arg;
+        }
+    }
+    
+    private static class TwoMulOp2 implements ITransformOperation<Float, Float> {
+
+        @Override
+        public Float invoke(Float arg) {
             return 2.0f * arg;
         }
     }

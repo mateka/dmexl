@@ -26,10 +26,6 @@ public class TaskExecutionContext extends OptimizingExecutionContext {
         super(treeOptimizer);
         this.executor = new TaskExecutor(nThreads);
     }
-    @Override
-    public <Result> Result execute(Algorithm<Result> algo) throws Exception {
-        return getOptimizer().optimize(algo).accept(this);
-    }
 
     @Override
     public IExecutor getExecutor() {
@@ -39,6 +35,11 @@ public class TaskExecutionContext extends OptimizingExecutionContext {
     @Override
     public <T> Iterator<T> iterator(List<T> i) {
         return i.iterator();
+    }
+        
+    @Override
+    public <Result> Result execute(Algorithm<Result> algo) throws Exception {
+        return optimize(algo).accept(this);
     }
     
     private TaskExecutor executor;

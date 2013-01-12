@@ -103,23 +103,19 @@ public class TaskExecutor implements IExecutor {
 
     @Override
     public <R, E, O extends IAccumulateOperation<R, E>> R execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws Exception {
-
-        //Future<List<E>> aPart = createTask(algo.getA(), ctx);
-//            Future<O> bPart = createTask(algo.getB(), ctx);
-//            Future<R> cPart = createTask(algo.getC(), ctx);
-
-        final List<E> coll = algo.getA().accept(ctx);//aPart.get();
+        final List<E> coll = algo.getA().accept(ctx);
         final O op = algo.getB().accept(ctx);
         final R zero = algo.getC().accept(ctx);
         final int threshold = Math.max(getWorkersNumber(), coll.size() / getWorkersNumber());
-        //System.out.println("accumulate");
-        //return accumulateInSplit(coll, bPart.get(), cPart.get(), ctx, threshold);
+
 
         if (coll.size() > threshold) {
-            int partSize = coll.size() / 2;
-            while (partSize > threshold) {
-                partSize = partSize / 2;
-            }
+            final int power = 1 + (int)(Math.log(coll.size()/threshold) / Math.log(2));
+            final int partSize = coll.size() / (int)Math.pow(2, power);
+//            int partSize = coll.size() / 2; // coll.size / (2^(log2(coll.size/threshold)))
+//            while (partSize > threshold) {
+//                partSize = partSize / 2;
+//            }
 
             final List<Future<R>> tasks = new LinkedList<>();
             try {

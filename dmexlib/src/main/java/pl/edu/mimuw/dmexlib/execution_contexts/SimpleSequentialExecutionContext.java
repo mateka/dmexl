@@ -36,10 +36,12 @@ public class SimpleSequentialExecutionContext extends OptimizingExecutionContext
     public IExecutor getExecutor() {
         return executor;
     }
-
+    
     @Override
     public <Result> Result execute(Algorithm<Result> algo) throws Exception {
-        return getOptimizer().optimize(algo).accept(this);
+        return optimize(algo).accept(this);
     }
+    
+    
     private SequentialExecutor executor;
 }

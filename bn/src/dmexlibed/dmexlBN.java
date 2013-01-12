@@ -12,6 +12,8 @@ import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
+import pl.edu.mimuw.dmexlib.optimizers.SimpleOptimizer;
 
 /**
  *
@@ -41,6 +43,7 @@ public class dmexlBN {
         Table t = rn.generateTable(objects);
 
         IExecutionContext ctx;
+        ITreeOptimizer optimizer;
         switch (method) {
             case "original":
                 originalCalc(rn, t, attribs, subTables);
@@ -55,6 +58,24 @@ public class dmexlBN {
                 break;
             case "task":
                 ctx = new TaskExecutionContext(8);
+                try {
+                    dmexlibCalc(ctx, rn, t, attribs, subTables);
+                } finally {
+                    ctx.getExecutor().shutdown();
+                }
+                break;
+            case "seqO1":
+                optimizer = new SimpleOptimizer();
+                ctx = new SimpleSequentialExecutionContext(optimizer);
+                try {
+                    dmexlibCalc(ctx, rn, t, attribs, subTables);
+                } finally {
+                    ctx.getExecutor().shutdown();
+                }
+                break;
+            case "taskO1":
+                optimizer = new SimpleOptimizer();
+                ctx = new TaskExecutionContext(optimizer, 8);
                 try {
                     dmexlibCalc(ctx, rn, t, attribs, subTables);
                 } finally {
