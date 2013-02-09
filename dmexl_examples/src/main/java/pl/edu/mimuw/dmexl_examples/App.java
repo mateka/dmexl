@@ -23,11 +23,6 @@ public class App {
     public static void main(String[] args) {
         IExecutionContext e = null, t = null;
         try {
-            LazyList<Integer, GenOp> myList = new LazyList<>(10, new GenOp());
-            
-            
-            
-            
             System.out.println("started 4");
 
             ITreeOptimizer optimizer = new SimpleOptimizer();
@@ -35,12 +30,10 @@ public class App {
 
             t = new TaskExecutionContext(4);
 
-            LazyList<Integer, GenOp> is = new LazyList<>(128, new GenOp());
-
             // Sum all elements
             Algorithm<Float> sumAlg = I(accumulate(
-                    transform(transform(is, new TwoMulOp()), new TwoMulOp2()),
-                    //is,
+                    transform(transform(generateN(128, new GenOp()), new TwoMulOp()), new TwoMulOp2()),
+                    //generateN(128, new GenOp()),
                     new SumOp(),
                     0.0f));
             // SumOp always succeeds

@@ -18,10 +18,12 @@ import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
 import pl.edu.mimuw.dmexlib.nodes.FilterNode;
+import pl.edu.mimuw.dmexlib.nodes.GenerateNode;
 import pl.edu.mimuw.dmexlib.nodes.IdentityNode;
 import pl.edu.mimuw.dmexlib.nodes.TransformNode;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 
 /**
@@ -51,6 +53,11 @@ public class TaskExecutor implements IExecutor {
     @Override
     public <T, F extends IFilterOperation<T>> List<T> execute(FilterNode<T, F> algo, IExecutionContext ctx) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    public <E, O extends IGenerateOperation<E>> List<E> execute(GenerateNode<E, O> algo, IExecutionContext ctx) throws Exception {
+        return algo.execute(ctx);
     }
 
     @Override

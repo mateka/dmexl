@@ -8,6 +8,7 @@ import java.util.*;
 import pl.edu.mimuw.dmexlib.nodes.*;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 
 /**
@@ -48,6 +49,23 @@ public abstract class dmexl {
     
     static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(Algorithm<List<E>> elements, Algorithm f) {
         return new FilterNode<>(elements, f);
+    }
+    
+    /// Helper methods for creating generator nodes
+    static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(int count, O op) {
+        return generateN(I(count), I(op));
+    }
+    
+    static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(int count, Algorithm<O> op) {
+        return generateN(I(count), op);
+    }
+    
+    static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(Algorithm<Integer> count, O op) {
+        return generateN(count, I(op));
+    }
+    
+    static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(Algorithm<Integer> count, Algorithm<O> op) {
+        return new GenerateNode<>(count, op);
     }
 
     /// Helper methods for creating transform nodes
