@@ -28,28 +28,28 @@ public abstract class dmexl {
     }
     
     /// Helper function for transforming result into set
-    static public <E> IdentityNode<Set<E>> set(E element) {
-        Set<E> result = new HashSet<>();
-        result.add(element);
-        return I(result);
-    }
-        
-    /// Helper methods for creating filter nodes
-    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(List<E> elements, F f) {
-        return filter(I(elements), I(f));
-    }
-    
-    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(List<E> elements, Algorithm f) {
-        return filter(I(elements), f);
-    }
-    
-    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(Algorithm<List<E>> elements, F f) {
-        return filter(elements, I(f));
-    }
-    
-    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(Algorithm<List<E>> elements, Algorithm f) {
-        return new FilterNode<>(elements, f);
-    }
+//    static public <E> IdentityNode<Set<E>> set(E element) {
+//        Set<E> result = new HashSet<>();
+//        result.add(element);
+//        return I(result);
+//    }
+//        
+//    /// Helper methods for creating filter nodes
+//    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(List<E> elements, F f) {
+//        return filter(I(elements), I(f));
+//    }
+//    
+//    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(List<E> elements, Algorithm f) {
+//        return filter(I(elements), f);
+//    }
+//    
+//    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(Algorithm<List<E>> elements, F f) {
+//        return filter(elements, I(f));
+//    }
+//    
+//    static public <E, F extends IFilterOperation<E>> FilterNode<E, F> filter(Algorithm<List<E>> elements, Algorithm f) {
+//        return new FilterNode<>(elements, f);
+//    }
     
     /// Helper methods for creating generator nodes
     static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(int count, O op) {
