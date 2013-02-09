@@ -2,12 +2,14 @@ package pl.edu.mimuw.dmexl_examples;
 
 import java.util.*;
 import pl.edu.mimuw.dmexlib.Algorithm;
+import pl.edu.mimuw.dmexlib.LazyList;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 import pl.edu.mimuw.dmexlib.optimizers.SimpleOptimizer;
@@ -21,6 +23,11 @@ public class App {
     public static void main(String[] args) {
         IExecutionContext e = null, t = null;
         try {
+            LazyList<Integer, GenOp> myList = new LazyList<>(10, new GenOp());
+            
+            
+            
+            
             System.out.println("started 4");
 
             ITreeOptimizer optimizer = new SimpleOptimizer();
@@ -28,10 +35,7 @@ public class App {
 
             t = new TaskExecutionContext(4);
 
-            List<Integer> is = new ArrayList<>();
-            for (int i = 0; i < 128; ++i) {
-                is.add(i);
-            }
+            LazyList<Integer, GenOp> is = new LazyList<>(128, new GenOp());
 
             // Sum all elements
             Algorithm<Float> sumAlg = I(accumulate(
@@ -146,5 +150,14 @@ public class App {
         public boolean invoke(Integer arg) {
             return 0 == (arg % 2);
         }
+    }
+    
+    private static class GenOp implements IGenerateOperation<Integer> {
+
+        @Override
+        public Integer invoke(int param) {
+            return param;
+        }
+        
     }
 }
