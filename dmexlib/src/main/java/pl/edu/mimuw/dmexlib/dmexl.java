@@ -86,35 +86,19 @@ public abstract class dmexl {
     }
 
     /// Helper methods for creating accumulate nodes
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, O op, R zero) {
-        return accumulate(I(elements), I(op), I(zero));
+    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, O op) {
+        return accumulate(I(elements), I(op));
     }
 
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, O op, Algorithm zero) {
-        return accumulate(I(elements), I(op), zero);
-    }
-
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, Algorithm op, R zero) {
-        return accumulate(I(elements), op, I(zero));
-    }
-
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, Algorithm op, Algorithm zero) {
-        return accumulate(I(elements), op, zero);
+    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(List<E> elements, Algorithm op) {
+        return accumulate(I(elements), op);
     }
        
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, O op, R zero) {
-        return accumulate(elements, I(op), I(zero));
+    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, O op) {
+        return accumulate(elements, I(op));
     }
 
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, O op, Algorithm zero) {
-        return accumulate(elements, I(op), zero);
-    }
-
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, Algorithm op, R zero) {
-        return accumulate(elements, op, I(zero));
-    }
-
-    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, Algorithm op, Algorithm zero) {
-        return new AccumulateNode<>(elements, op, zero);
+    static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, Algorithm op) {
+        return new AccumulateNode<>(elements, op);
     }
 }

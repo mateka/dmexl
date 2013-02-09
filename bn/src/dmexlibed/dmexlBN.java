@@ -6,11 +6,13 @@ import bn.Table;
 import java.util.LinkedList;
 import java.util.List;
 import pl.edu.mimuw.dmexlib.Algorithm;
+import pl.edu.mimuw.dmexlib.LazyList;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 import pl.edu.mimuw.dmexlib.optimizers.SimpleOptimizer;
@@ -36,7 +38,9 @@ public class dmexlBN {
         final int attribs = Integer.parseInt(args[1]);
         final double d = Integer.parseInt(args[2]) / 100.0;
         final int objects = Integer.parseInt(args[3]);
-        final int subTables = Integer.parseInt(args[4]);
+        // Ensure each attribute has the same number of subtables
+        final int st = Integer.parseInt(args[4]);
+        final int subTables = st + (0 != st % attribs ? attribs - st % attribs : 0);
 
         Graph rn = new Graph();
         rn.randomNetwork(attribs, 2, d);
@@ -89,13 +93,7 @@ public class dmexlBN {
         Graph mln = null;
         double time = 0.0;
         for (int k = 3; k < attribs; k++) {
-            List<Table> Ct = new LinkedList<>();
-            final int loops = Math.max(subTables/attribs, 1);
-            for (int i = 0; i < loops; i++) {
-                for (int j = 0; j < attribs; j++) {
-                    Ct.add(new SubTable(t, k, j));
-                }
-            }
+            List<Table> Ct = new LazyList<>(subTables, new GenerateSubtable(t, k, attribs));
 
             long start = System.nanoTime();
             List<Graph> gs = new LinkedList<>();
@@ -137,22 +135,13 @@ public class dmexlBN {
         double time = 0.0;
         Graph result = null;
         for (int k = 3; k < attribs; k++) {
-            List<Table> Ct = new LinkedList<>();
-            final int loops = Math.max(subTables/attribs, 1);
-            for (int i = 0; i < loops; i++) {
-                for (int j = 0; j < attribs; j++) {
-                    Ct.add(new SubTable(t, k, j));
-                }
-            }
-
             long start = System.nanoTime();
-            Graph zero = new Graph();
-            zero.learnStructureK2(Ct.get(0));
 
             Algorithm<Graph> algo = accumulate(
-                    transform(Ct, new Induce()),
-                    new Aggregate(),
-                    zero);
+                    transform(
+                        generateN(subTables, new GenerateSubtable(t, k, attribs)),
+                        new Induce()),
+                    new Aggregate());
             try {
                 result = ctx.execute(algo);
             } catch (Exception e) {
@@ -171,6 +160,23 @@ public class dmexlBN {
         } else {
             System.out.println(-1.0 + ", " + time);
         }
+    }
+
+    private static class GenerateSubtable implements IGenerateOperation<Table> {
+
+        public GenerateSubtable(Table table, int k, int attribs) {
+            this.table = table;
+            this.k = k;
+            this.attribs = attribs;
+        }
+
+        @Override
+        public Table invoke(int i) {
+            return new SubTable(table, k, i % attribs);
+        }
+        private final Table table;
+        private final int k;
+        private final int attribs;
     }
 
     private static class Induce implements ITransformOperation<Graph, Table> {

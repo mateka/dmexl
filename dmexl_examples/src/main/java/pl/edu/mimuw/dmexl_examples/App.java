@@ -34,8 +34,7 @@ public class App {
             Algorithm<Float> sumAlg = I(accumulate(
                     transform(transform(generateN(128, new GenOp()), new TwoMulOp()), new TwoMulOp2()),
                     //generateN(128, new GenOp()),
-                    new SumOp(),
-                    0.0f));
+                    new SumOp() ));
             // SumOp always succeeds
 
             long start2 = System.nanoTime();

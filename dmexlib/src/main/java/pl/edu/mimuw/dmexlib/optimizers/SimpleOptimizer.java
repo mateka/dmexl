@@ -41,8 +41,8 @@ public class SimpleOptimizer implements ITreeOptimizer {
     
     @Override
     public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode optimize(AccumulateNode<R, E, O> node) {
-        if (node.getA() instanceof TransformNode) {
-            return optimizeAccumulateTransformNode(node, (TransformNode) optimize((TransformNode)node.getA()));
+        if (node.getLeft() instanceof TransformNode) {
+            return optimizeAccumulateTransformNode(node, (TransformNode) optimize((TransformNode)node.getLeft()));
         }
         return node;
     }
@@ -58,16 +58,15 @@ public class SimpleOptimizer implements ITreeOptimizer {
     private <R, R1, A, Aop extends IAccumulateOperation<R, R1>, Top extends ITransformOperation<R1, A>>
             AccumulateNode<R, A, AccumulateTransformOperation<R, R1, A>>
             optimizeAccumulateTransformNode(AccumulateNode<R, R1, Aop> aNode, TransformNode<R1, A, Top> tNode) {
-        assert tNode == (TransformNode) aNode.getA();
+        assert tNode == (TransformNode) aNode.getLeft();
 
         final Algorithm<List<A>> in = tNode.getLeft();
-        final Algorithm<R> zero = aNode.getC();
 
-        final Algorithm<IAccumulateOperation<R, R1>> aop = (Algorithm<IAccumulateOperation<R, R1>>) aNode.getB();
+        final Algorithm<IAccumulateOperation<R, R1>> aop = (Algorithm<IAccumulateOperation<R, R1>>) aNode.getRight();
         final Algorithm<ITransformOperation<R1, A>> top = (Algorithm<ITransformOperation<R1, A>>) tNode.getRight();
         final AccumulateTransformOperationNode<R, R1, A> op = new AccumulateTransformOperationNode<>(aop, top);
 
-        return new AccumulateNode<>(in, op, zero);
+        return new AccumulateNode<>(in, op);
     }
 
     private <R, R1, A, outOp extends ITransformOperation<R, R1>, inOp extends ITransformOperation<R1, A>>

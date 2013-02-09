@@ -54,7 +54,7 @@ public class TaskExecutor implements IExecutor {
     public <T, F extends IFilterOperation<T>> List<T> execute(FilterNode<T, F> algo, IExecutionContext ctx) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     @Override
     public <E, O extends IGenerateOperation<E>> List<E> execute(GenerateNode<E, O> algo, IExecutionContext ctx) throws Exception {
         return algo.execute(ctx);
@@ -110,20 +110,13 @@ public class TaskExecutor implements IExecutor {
 
     @Override
     public <R, E, O extends IAccumulateOperation<R, E>> R execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws Exception {
-        final List<E> coll = algo.getA().accept(ctx);
-        final O op = algo.getB().accept(ctx);
-        final R zero = algo.getC().accept(ctx);
+        final List<E> coll = algo.getLeft().accept(ctx);
+        final O op = algo.getRight().accept(ctx);
         final int threshold = Math.max(getWorkersNumber(), coll.size() / getWorkersNumber());
 
-
         if (coll.size() > threshold) {
-            final int power = 1 + (int)(Math.log(coll.size()/threshold) / Math.log(2));
-            final int partSize = coll.size() / (int)Math.pow(2, power);
-//            int partSize = coll.size() / 2; // coll.size / (2^(log2(coll.size/threshold)))
-//            while (partSize > threshold) {
-//                partSize = partSize / 2;
-//            }
-
+            final int power = 1 + (int) (Math.log(coll.size() / threshold) / Math.log(2));
+            final int partSize = coll.size() / (int) Math.pow(2, power);
             final List<Future<R>> tasks = new LinkedList<>();
             try {
                 final CompletionService<R> ecs = new ExecutorCompletionService<>(getExecService());
@@ -133,7 +126,7 @@ public class TaskExecutor implements IExecutor {
                     tasks.add(ecs.submit(new Callable<R>() {
                         @Override
                         public R call() throws Exception {
-                            return sequentiaAccumulate(coll.subList(begin, end), op, zero);
+                            return sequentiaAccumulate(coll.subList(begin, end), op);
                         }
                     }));
                 }
@@ -145,7 +138,7 @@ public class TaskExecutor implements IExecutor {
                 }
             }
         } else {
-            return sequentiaAccumulate(coll, op, zero);
+            return sequentiaAccumulate(coll, op);
         }
 
     }
@@ -169,11 +162,14 @@ public class TaskExecutor implements IExecutor {
         });
     }
 
-    private <R, E, O extends IAccumulateOperation<R, E>> R sequentiaAccumulate(List<E> coll, O op, R zero) {
+    private <R, E, O extends IAccumulateOperation<R, E>> R sequentiaAccumulate(List<E> coll, O op) {
         Iterator<E> elements = coll.iterator();
-        R result = zero;
-        while (elements.hasNext()) {
-            result = op.invoke(result, op.invoke(elements.next()));
+        R result = null;
+        if (elements.hasNext()) {
+            result = op.invoke(elements.next());
+            while (elements.hasNext()) {
+                result = op.invoke(result, op.invoke(elements.next()));
+            }
         }
         return result;
     }
