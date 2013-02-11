@@ -21,6 +21,16 @@ public class TableMergeReturn
 	private Set<Integer> intersection;
 	
 	/**
+	 * The set of these indexes of subtable A subset of attributes s, which does not correspond to elements of intersection.
+	 */
+	private Set<Integer> outIndexA;
+	
+	/**
+	 * The set of these indexes of subtable B subset of attributes s, which does not correspond to elements of intersection.
+	 */
+	private Set<Integer> outIndexB;
+	
+	/**
 	 * For the given index of subtable A subset of attributes s this array returns index of this attribute in the new subtable - result of merging A and B.
 	 */
 	private int[] newIndexA;
@@ -50,8 +60,10 @@ public class TableMergeReturn
 	 * @param nb	Value for member newIndexB.
 	 * @param ra	Value for member revIndexA.
 	 * @param rb	Value for member revIndexB.
+	 * @param oa	Value for member outIndexA.
+	 * @param ob	Value for member outIndexB.
 	 */
-	public TableMergeReturn(SubTable s, Set<Integer> i, int[] na, int[] nb, int[] ra, int[] rb)
+	public TableMergeReturn(SubTable s, Set<Integer> i, int[] na, int[] nb, int[] ra, int[] rb, Set<Integer> oa, Set<Integer> ob)
 	{
 		subtable = s;
 		intersection = i;
@@ -59,6 +71,8 @@ public class TableMergeReturn
 		newIndexB = nb;
 		revIndexA = ra;
 		revIndexB = rb;
+		outIndexA = oa;
+		outIndexB = ob;
 	}
 	
 	/**
@@ -77,6 +91,24 @@ public class TableMergeReturn
 	public Set<Integer> getIntersection()
 	{
 		return intersection;
+	}
+	
+	/**
+	 * Returns appropriate member.
+	 * @return	Value of member outIndexA.
+	 */
+	public Set<Integer> getOutIndexA()
+	{
+		return outIndexA;
+	}
+	
+	/**
+	 * Returns appropriate member.
+	 * @return	Value of member outIndexB.
+	 */
+	public Set<Integer> getOutIndexB()
+	{
+		return outIndexB;
 	}
 	
 	/**

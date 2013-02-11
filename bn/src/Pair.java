@@ -108,4 +108,25 @@ public class Pair implements Comparable<Pair>
 		else if (x == a.x && y == a.y) { return 0; }
 		else { return 1; }
 	}
+
+	/**
+	 * Overrides equals function.
+	 */
+	@Override public boolean equals(Object obj)
+	{
+		if (obj == null) { return false; }
+		if (obj.getClass() != getClass()) { return false; }
+
+		Pair a = (Pair) obj;
+		return ( x == a.x && y == a.y);
+	}
+
+	/**
+	 * Overrides hashCode function.
+	 */
+	@Override public int hashCode()
+	{
+		return 1013 * x ^ 1009 * y;
+
+	}
 }

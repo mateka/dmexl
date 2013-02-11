@@ -1,5 +1,6 @@
 package bn;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -158,5 +159,91 @@ public class Generator
 		}
 		
 		return sam;
+	}
+	
+	/**
+	 * Performs one-dimensional k-means clustering.
+	 * @param x	List of real numbers to group into clusters, sorted in increasing order. This array should have at least two elements.
+	 * @param k	Number of clusters to create, minimum 2.
+	 * @param iter	Maximal number of iterations, minimum 0 (in the case of 0 clusters are created on the basis of starting random positions of centroids).
+	 * @return	Result clusters, the range of each cluster is represented as pair of indexes of x array (first and last position belonging to the cluster).
+	 */
+	public static Pair[] kMeans(double[] x, int k, int iter)
+	{
+		if (x.length < 2)
+		{
+			System.out.println("Incorrect x parameter in kMeans function, it should be an array containing at least two elements.");
+			System.exit(1);
+		}
+		k = Math.max(k, 2);
+		iter = Math.max(iter, 0);
+		
+		boolean stop = false;
+		int i, j, l, cur;
+		double sum;
+		double min_x = x[0];
+		double max_x = x[x.length - 1];
+		double[] centr = new double [k];
+		Pair[] clust = new Pair [k];
+		
+		for (i = 0; i < k; i++)
+		{
+			clust[i] = new Pair();
+		}
+		
+		for (i = 0; i < k; i++)
+		{
+			centr[i] = min_x + (max_x - min_x)*random();
+		}
+		Arrays.sort(centr);
+		
+		cur = 0;
+		clust[0].setX(0);
+		clust[k-1].setY(x.length - 1);
+		for (i = 1; i < x.length && cur < k - 1; i++)
+		{
+			if (Math.abs(centr[cur] - x[i]) > Math.abs(centr[cur + 1] - x[i]))
+			{
+				clust[cur].setY(i - 1);
+				clust[cur + 1].setX(i);
+				cur++;
+			}
+		}
+		
+		for (j = 0; j < iter && !stop; j++)
+		{
+			for (l = 0; l < k; l++)
+			{
+				sum = 0;
+				for (i = clust[l].getX(); i <= clust[l].getY(); i++)
+				{
+					sum += x[i];
+				}
+				
+				centr[l] = sum / (double)(clust[l].getY() - clust[l].getX() + 1);
+			}
+			
+			cur = 0;
+			stop = true;
+			for (i = 1; i < x.length && cur < k - 1; i++)
+			{
+				if (Math.abs(centr[cur] - x[i]) > Math.abs(centr[cur + 1] - x[i]))
+				{
+					if (stop)
+					{
+						if (clust[cur].getY() != i - 1)
+						{
+							stop = false;
+						}
+					}
+					
+					clust[cur].setY(i - 1);
+					clust[cur + 1].setX(i);
+					cur++;
+				}
+			}
+		}
+		
+		return clust;
 	}
 }

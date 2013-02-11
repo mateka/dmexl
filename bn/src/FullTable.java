@@ -113,4 +113,48 @@ public class FullTable implements Table
 		
 		return (double) sum / (double) cl.length;
 	}
+	
+	/**
+	 * Clones whole table - that is returns new object Table, containing separated copy of the table array and the attributes description array.
+	 * @return	Clone of the object.
+	 */
+	@Override public Table clone()
+	{
+		int i, j;
+		FullTable tab = new FullTable(m, n);
+		
+		for (i = 0; i < m; i++)
+		{
+			for (j = 0; j < n; j++)
+			{
+				tab.t[i][j] = t[i][j];
+			}
+		}
+		for (i = 0; i < n; i++)
+		{
+			tab.v[i] = v[i];
+		}
+		
+		return tab;
+	}
+	
+	/**
+	 * Disturbs table values - for each row with probability pr converts it into the vector of randomly and independently chosen values (in the specified range for each attribute).
+	 * @param pr	Probability of converting each row.
+	 */
+	@Override public void disturb(double pr)
+	{
+		int i, j;
+		
+		for (i = 0; i < m; i++)
+		{
+			if (Generator.random() < pr)
+			{
+				for (j = 0; j < n; j++)
+				{
+					t[i][j] = Generator.random(v[j]);
+				}
+			}
+		}
+	}
 }

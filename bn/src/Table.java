@@ -67,4 +67,16 @@ public interface Table
 	 * @return	Accuracy of prediction.
 	 */
 	double checkAccuracy(int[] cl, int i);
+	
+	/**
+	 * Clones whole table - that is returns new object Table, containing separated copy of the table array and the attributes description array.
+	 * @return	Clone of the object.
+	 */
+	Table clone();
+	
+	/**
+	 * Disturbs table values - for each row with probability pr converts it into the vector of randomly and independently chosen values (in the specified range for each attribute).
+	 * @param pr	Probability of converting each row.
+	 */
+	void disturb(double pr);
 }

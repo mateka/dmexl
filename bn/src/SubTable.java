@@ -2,8 +2,10 @@ package bn;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,6 +43,11 @@ public class SubTable implements Table
 	 * Vector containing sorted indexes of attributes from the subset.
 	 */
 	private int[] s;
+	
+	/**
+	 * For each index in the original full table this map returns either index of this element in the subset, or nothing - if indicated index does not belong to the subset.
+	 */
+	private Map<Integer, Integer> pos;
 
 	/**
 	 * Constructor, creates empty subtable.
@@ -52,6 +59,7 @@ public class SubTable implements Table
 		m = 0;
 		n = 0;
 		s = null;
+		pos = null;
 	}
 
 	/**
@@ -61,20 +69,28 @@ public class SubTable implements Table
 	 */
 	public SubTable(Table tab, int x)
 	{
+		int i;
+		
 		t = tab.getT();
 		v = tab.getV();
 		m = tab.getM();
 		n = Math.max(x, 1);
+		pos = new HashMap<Integer, Integer>();
 		s = Generator.sample(n, tab.getN());
 		Arrays.sort(s);
 		
 		if (tab instanceof SubTable)
 		{
 			SubTable stab = (SubTable) tab;
-			for (int i = 0; i < s.length; i++)
+			for (i = 0; i < s.length; i++)
 			{
 				s[i] = stab.getS(s[i]);
 			}
+		}
+		
+		for (i = 0; i < s.length; i++)
+		{
+			pos.put(s[i], i);
 		}
 	}
 	
@@ -86,20 +102,28 @@ public class SubTable implements Table
 	 */
 	public SubTable(Table tab, int x, int c)
 	{
+		int i;
+		
 		t = tab.getT();
 		v = tab.getV();
 		m = tab.getM();
 		n = Math.max(x, 1);
+		pos = new HashMap<Integer, Integer>();
 		s = Generator.sample(n, tab.getN(), c);
 		Arrays.sort(s);
 		
 		if (tab instanceof SubTable)
 		{
 			SubTable stab = (SubTable) tab;
-			for (int i = 0; i < s.length; i++)
+			for (i = 0; i < s.length; i++)
 			{
 				s[i] = stab.getS(s[i]);
 			}
+		}
+		
+		for (i = 0; i < s.length; i++)
+		{
+			pos.put(s[i], i);
 		}
 	}
 	
@@ -180,6 +204,8 @@ public class SubTable implements Table
 		int[] rib = new int [a.v.length];
 		int i, j, k;
 		Set<Integer> inters = new HashSet<Integer>();
+		Set<Integer> outa = new HashSet<Integer>();
+		Set<Integer> outb = new HashSet<Integer>();
 		
 		c.m = a.m;
 		c.t = a.t;
@@ -194,6 +220,7 @@ public class SubTable implements Table
 			while (i < x.length && x[i] < y[j])
 			{
 				mrg.add(x[i]);
+				outa.add(i);
 				nia[i] = k;
 				i++;
 				k++;
@@ -203,6 +230,7 @@ public class SubTable implements Table
 				while (j < y.length)
 				{
 					mrg.add(y[j]);
+					outb.add(j);
 					nib[j] = k;
 					j++;
 					k++;
@@ -212,6 +240,7 @@ public class SubTable implements Table
 			while (j < y.length && x[i] > y[j])
 			{
 				mrg.add(y[j]);
+				outb.add(j);
 				nib[j] = k;
 				j++;
 				k++;
@@ -221,6 +250,7 @@ public class SubTable implements Table
 				while (i < x.length)
 				{
 					mrg.add(x[i]);
+					outa.add(i);
 					nia[i] = k;
 					i++;
 					k++;
@@ -244,6 +274,7 @@ public class SubTable implements Table
 				while (j < y.length)
 				{
 					mrg.add(y[j]);
+					outb.add(j);
 					nib[j] = k;
 					j++;
 					k++;
@@ -255,6 +286,7 @@ public class SubTable implements Table
 				while (i < x.length)
 				{
 					mrg.add(x[i]);
+					outa.add(i);
 					nia[i] = k;
 					i++;
 					k++;
@@ -266,7 +298,59 @@ public class SubTable implements Table
 		for (i = 0; i < c.s.length; i++) { c.s[i] = mrg.get(i); }
 		c.n = c.s.length;
 		
-		return new TableMergeReturn(c, inters, nia, nib, ria, rib);
+		c.pos = new HashMap<Integer, Integer>();
+		for (i = 0; i < c.s.length; i++)
+		{
+			c.pos.put(c.s[i], i);
+		}
+		
+		
+		return new TableMergeReturn(c, inters, nia, nib, ria, rib, outa, outb);
+	}
+	
+	/**
+	 * Merges given as parameter group of subtables, in the sense of merging their subsets of attributes.
+	 * @param a	List of subtables to merge.
+	 * @return	New object of type SubTable - result of merging.
+	 */
+	public static SubTable merge(SubTable[] a)
+	{
+		int i, j;
+		SubTable c = new SubTable();
+		
+		c.m = a[0].m;
+		c.t = a[0].t;
+		c.v = a[0].v;
+		
+		Set<Integer> hs = new HashSet<Integer>();
+		
+		for (i = 0; i < a.length; i++)
+		{
+			for (j = 0; j < a[i].n; j++)
+			{
+				hs.add(a[i].s[j]);
+			}
+		}
+		
+		c.n = hs.size();
+		c.s = new int [c.n];
+		
+		i = 0;
+		for (Integer k : hs)
+		{
+			c.s[i] = k;
+			i++;
+		}
+		
+		Arrays.sort(c.s);
+		
+		c.pos = new HashMap<Integer, Integer>();
+		for (i = 0; i < c.s.length; i++)
+		{
+			c.pos.put(c.s[i], i);
+		}
+		
+		return c;
 	}
 	
 	/**
@@ -288,5 +372,82 @@ public class SubTable implements Table
 		}
 		
 		return (double) sum / (double) cl.length;
+	}
+	
+	/**
+	 * Clones whole table - that is returns new object Table, containing separated copy of the table array, the attributes description array, and the attributes subset array.
+	 * @return	Clone of the object.
+	 */
+	@Override public Table clone()
+	{
+		int i, j;
+		SubTable tab = new SubTable();
+		
+		tab.m = m;
+		tab.n = n;
+		
+		tab.t = new int [m][v.length];
+		tab.v = new int [v.length];
+		tab.s = new int [s.length];
+		
+		for (i = 0; i < m; i++)
+		{
+			for (j = 0; j < v.length; j++)
+			{
+				tab.t[i][j] = t[i][j];
+			}
+		}
+		for (i = 0; i < v.length; i++)
+		{
+			tab.v[i] = v[i];
+		}
+		for (i = 0; i < s.length; i++)
+		{
+			tab.s[i] = s[i];
+		}
+		
+		tab.pos = new HashMap<Integer, Integer>();
+		tab.pos.putAll(pos);
+		
+		return tab;
+	}
+	
+	/**
+	 * Disturbs table values - for each row with probability pr converts it into the vector of randomly and independently chosen values (in the specified range for each attribute).
+	 * @param pr	Probability of converting each row.
+	 */
+	@Override public void disturb(double pr)
+	{
+		int i, j;
+		
+		for (i = 0; i < m; i++)
+		{
+			if (Generator.random() < pr)
+			{
+				for (j = 0; j < n; j++)
+				{
+					t[i][s[j]] = Generator.random(v[s[j]]);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Returns index of indicated attribute in the subtable.
+	 * @param i	Index of some attribute in the original full table.
+	 * @return	Index of these attribute in the subtable, or -1 in the case when this attribute does not belong to the subtable.
+	 */
+	public int indexOf(int i)
+	{
+		Integer k = pos.get(i);
+		if (k == null)
+		{
+			return -1;
+		}
+		else
+		{
+			return k;
+		}
+		
 	}
 }
