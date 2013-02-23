@@ -26,12 +26,13 @@ public class dmexlBN {
     public static void main(String[] args) {
         if (5 != args.length) {
             System.out.println("Wrong number of arguments.");
-            System.out.println("Usage: bn.jar <method> <attributes> <density> <table size> <sub tables>");
+            System.out.println("Usage: bn.jar <method> <attributes> <density> <table size> <sub tables> <processors>");
             System.out.println("\tmethod - execution method");
             System.out.println("\tattributes - number of vertices of original network");
             System.out.println("\tdensity - density of original network");
             System.out.println("\ttable size - number of objects in original table");
             System.out.println("\tsub tables - number of subtables");
+            System.out.println("\tprocessors - number of processors");
             return;
         }
         final String method = args[0];
@@ -41,6 +42,7 @@ public class dmexlBN {
         // Ensure each attribute has the same number of subtables
         final int st = Integer.parseInt(args[4]);
         final int subTables = st + (0 != st % attribs ? attribs - st % attribs : 0);
+        final int processors = Integer.parseInt(args[5]);
 
         Graph rn = new Graph();
         rn.randomNetwork(attribs, 2, d);
@@ -61,7 +63,7 @@ public class dmexlBN {
                 }
                 break;
             case "task":
-                ctx = new TaskExecutionContext(8);
+                ctx = new TaskExecutionContext(4*processors);
                 try {
                     dmexlibCalc(ctx, rn, t, attribs, subTables);
                 } finally {
