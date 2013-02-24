@@ -24,7 +24,7 @@ import pl.edu.mimuw.dmexlib.optimizers.SimpleOptimizer;
 public class dmexlBN {
 
     public static void main(String[] args) {
-        if (5 != args.length) {
+        if (6 != args.length) {
             System.out.println("Wrong number of arguments.");
             System.out.println("Usage: bn.jar <method> <attributes> <density> <table size> <sub tables> <processors>");
             System.out.println("\tmethod - execution method");
