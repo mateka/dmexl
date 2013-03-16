@@ -1,4 +1,4 @@
-package bn;
+package pl.edu.mimuw.bn;
 
 import java.util.Arrays;
 import java.util.Random;

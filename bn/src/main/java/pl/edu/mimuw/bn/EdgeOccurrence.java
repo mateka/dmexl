@@ -1,4 +1,4 @@
-package bn;
+package pl.edu.mimuw.bn;
 
 /**
  * Class storing edge and its occurrence of not appearing in the group of subgraphs, with mechanisms allowing ordering these edges by their occurrence.

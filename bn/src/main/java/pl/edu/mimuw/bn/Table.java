@@ -1,4 +1,4 @@
-package bn;
+package pl.edu.mimuw.bn;
 
 /**
  * Interface of the information system with nominal attributes.

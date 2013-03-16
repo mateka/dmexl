@@ -1,10 +1,10 @@
-package dmexlibed;
+package pl.edu.mimuw.bn.dmexlibed;
 
-import bn.Graph;
-import bn.SubTable;
-import bn.Table;
 import java.util.LinkedList;
 import java.util.List;
+import pl.edu.mimuw.bn.Graph;
+import pl.edu.mimuw.bn.SubTable;
+import pl.edu.mimuw.bn.Table;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.LazyList;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
@@ -48,46 +48,38 @@ public class dmexlBN {
         rn.randomNetwork(attribs, 2, d);
         Table t = rn.generateTable(objects);
 
-        IExecutionContext ctx;
-        ITreeOptimizer optimizer;
-        switch (method) {
-            case "original":
-                originalCalc(rn, t, attribs, subTables);
-                break;
-            case "seq":
-                ctx = new SimpleSequentialExecutionContext();
-                try {
-                    dmexlibCalc(ctx, rn, t, attribs, subTables);
-                } finally {
-                    ctx.getExecutor().shutdown();
-                }
-                break;
-            case "task":
-                ctx = new TaskExecutionContext(4*processors);
-                try {
-                    dmexlibCalc(ctx, rn, t, attribs, subTables);
-                } finally {
-                    ctx.getExecutor().shutdown();
-                }
-                break;
-            case "seqO1":
-                optimizer = new SimpleOptimizer();
-                ctx = new SimpleSequentialExecutionContext(optimizer);
-                try {
-                    dmexlibCalc(ctx, rn, t, attribs, subTables);
-                } finally {
-                    ctx.getExecutor().shutdown();
-                }
-                break;
-            case "taskO1":
-                optimizer = new SimpleOptimizer();
-                ctx = new TaskExecutionContext(optimizer, 8);
-                try {
-                    dmexlibCalc(ctx, rn, t, attribs, subTables);
-                } finally {
-                    ctx.getExecutor().shutdown();
-                }
-                break;
+        if ("original".equalsIgnoreCase(method)) {
+            originalCalc(rn, t, attribs, subTables);
+        } else if ("seq".equalsIgnoreCase(method)) {
+            IExecutionContext ctx = new SimpleSequentialExecutionContext();
+            try {
+                dmexlibCalc(ctx, rn, t, attribs, subTables);
+            } finally {
+                ctx.getExecutor().shutdown();
+            }
+        } else if ("task".equalsIgnoreCase(method)) {
+            IExecutionContext ctx = new TaskExecutionContext(4 * processors);
+            try {
+                dmexlibCalc(ctx, rn, t, attribs, subTables);
+            } finally {
+                ctx.getExecutor().shutdown();
+            }
+        } else if ("seqo1".equalsIgnoreCase(method)) {
+            ITreeOptimizer optimizer = new SimpleOptimizer();
+            IExecutionContext ctx = new SimpleSequentialExecutionContext(optimizer);
+            try {
+                dmexlibCalc(ctx, rn, t, attribs, subTables);
+            } finally {
+                ctx.getExecutor().shutdown();
+            }
+        } else if ("tasko1".equalsIgnoreCase(method)) {
+            ITreeOptimizer optimizer = new SimpleOptimizer();
+            IExecutionContext ctx = new TaskExecutionContext(optimizer, 8);
+            try {
+                dmexlibCalc(ctx, rn, t, attribs, subTables);
+            } finally {
+                ctx.getExecutor().shutdown();
+            }
         }
     }
 
@@ -95,10 +87,10 @@ public class dmexlBN {
         Graph mln = null;
         double time = 0.0;
         for (int k = 3; k < attribs; k++) {
-            List<Table> Ct = new LazyList<>(subTables, new GenerateSubtable(t, k, attribs));
+            List<Table> Ct = new LazyList<Table, GenerateSubtable>(subTables, new GenerateSubtable(t, k, attribs));
 
             long start = System.nanoTime();
-            List<Graph> gs = new LinkedList<>();
+            List<Graph> gs = new LinkedList<Graph>();
             for (Table subt : Ct) {
                 Graph grr = new Graph();
                 grr.learnStructureK2(subt);
@@ -141,8 +133,8 @@ public class dmexlBN {
 
             Algorithm<Graph> algo = accumulate(
                     transform(
-                        generateN(subTables, new GenerateSubtable(t, k, attribs)),
-                        new Induce()),
+                    generateN(subTables, new GenerateSubtable(t, k, attribs)),
+                    new Induce()),
                     new Aggregate());
             try {
                 result = ctx.execute(algo);

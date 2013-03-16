@@ -1,4 +1,4 @@
-package bn;
+package pl.edu.mimuw.bn;
 
 import java.io.FileWriter;
 import java.io.IOException;

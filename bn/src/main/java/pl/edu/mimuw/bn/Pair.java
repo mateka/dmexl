@@ -1,4 +1,4 @@
-package bn;
+package pl.edu.mimuw.bn;
 
 /**
  * Ordered pair of numbers.
