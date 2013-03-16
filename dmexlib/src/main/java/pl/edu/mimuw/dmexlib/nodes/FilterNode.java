@@ -50,6 +50,6 @@ public class FilterNode<Type, Filter extends IFilterOperation<Type>>
     }
 
     public List<Type> createNewCollection() {
-        return new ArrayList<>();
+        return new ArrayList<Type>();
     }
 }

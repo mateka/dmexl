@@ -73,8 +73,8 @@ public class TaskExecutor implements IExecutor {
 
             // Submit algorithm's tasks
             int size = 0;
-            CompletionService<R> ecs = new ExecutorCompletionService<>(getExecService());
-            tasks = new LinkedList<>();
+            CompletionService<R> ecs = new ExecutorCompletionService<R>(getExecService());
+            tasks = new LinkedList<Future<R>>();
             while (elements.hasNext()) {
                 final E current = elements.next();
                 final O fun = op;
@@ -117,9 +117,9 @@ public class TaskExecutor implements IExecutor {
         if (coll.size() > threshold) {
             final int power = 1 + (int) (Math.log(coll.size() / threshold) / Math.log(2));
             final int partSize = coll.size() / (int) Math.pow(2, power);
-            final List<Future<R>> tasks = new LinkedList<>();
+            final List<Future<R>> tasks = new LinkedList<Future<R>>();
             try {
-                final CompletionService<R> ecs = new ExecutorCompletionService<>(getExecService());
+                final CompletionService<R> ecs = new ExecutorCompletionService<R>(getExecService());
                 for (int i = 0; i < coll.size(); i += partSize) {
                     final int begin = i;
                     final int end = Math.min(i + partSize, coll.size());
@@ -179,9 +179,9 @@ public class TaskExecutor implements IExecutor {
             if (1 == inTasks.size()) {
                 return inTasks.get(0).get();
             } else {
-                final List<Future<R>> tasks = new LinkedList<>();
+                final List<Future<R>> tasks = new LinkedList<Future<R>>();
                 try {
-                    final CompletionService<R> ecs = new ExecutorCompletionService<>(getExecService());
+                    final CompletionService<R> ecs = new ExecutorCompletionService<R>(getExecService());
 
                     int size = inTasks.size();
                     if (1 == inTasks.size() % 2) {

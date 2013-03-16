@@ -48,6 +48,6 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
     }
     
     public List<Result> createNewCollection() {
-        return new ArrayList<>();
+        return new ArrayList<Result>();
     }
 }

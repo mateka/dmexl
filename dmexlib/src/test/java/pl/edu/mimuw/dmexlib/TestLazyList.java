@@ -22,7 +22,7 @@ public class TestLazyList extends TestCase {
     public void testBaseConditions() {
         final int size = 17;
         
-        LazyList<Integer, GenOp> myList = new LazyList<>(size, new GenOp());
+        LazyList<Integer, GenOp> myList = new LazyList<Integer, GenOp>(size, new GenOp());
         
         assertEquals(myList.size(), size);
         
@@ -41,14 +41,14 @@ public class TestLazyList extends TestCase {
     }
 
     public void testIndexIteration() {
-        LazyList<Integer, GenOp> myList = new LazyList<>(10, new GenOp());
+        LazyList<Integer, GenOp> myList = new LazyList<Integer, GenOp>(10, new GenOp());
         for (int i = 0; i < myList.size(); ++i) {
             assertEquals(i, (int) myList.get(i));
         }
     }
 
     public void testBaseIteration() {
-        LazyList<Integer, GenOp> myList = new LazyList<>(50, new GenOp());
+        LazyList<Integer, GenOp> myList = new LazyList<Integer, GenOp>(50, new GenOp());
         int i = 0;
         for (Iterator<Integer> it = myList.iterator(); it.hasNext();) {
             assertEquals(i++, (int) it.next());
@@ -58,7 +58,7 @@ public class TestLazyList extends TestCase {
     public void testBackwardsIteration() {
         final int size = 13;
         
-        LazyList<Integer, GenOp> myList = new LazyList<>(size, new GenOp());
+        LazyList<Integer, GenOp> myList = new LazyList<Integer, GenOp>(size, new GenOp());
         int i = size;
         for (ListIterator<Integer> it = myList.listIterator(myList.size()); it.hasPrevious();) {
             assertEquals(--i, (int) it.previous());
@@ -66,7 +66,7 @@ public class TestLazyList extends TestCase {
     }
 
     public void testSubListsIteration() {
-        LazyList<Integer, GenOp> myList = new LazyList<>(177, new GenOp());
+        LazyList<Integer, GenOp> myList = new LazyList<Integer, GenOp>(177, new GenOp());
         int i=0;
         for (Iterator<Integer> it = myList.subList(0, myList.size()/2).iterator(); it.hasNext();) {
             assertEquals(i++, (int) it.next());

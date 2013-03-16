@@ -27,7 +27,7 @@ public class AccumulateTransformOperationNode<R, R1, A>
         ITransformOperation<R1, A> top = ctx.getExecutor().execute(getRight(), ctx);
         IAccumulateOperation<R, R1> aop = ctx.getExecutor().execute(getLeft(), ctx);
         
-        return new AccumulateTransformOperation<>(aop, top);
+        return new AccumulateTransformOperation<R, R1, A>(aop, top);
     }
 
     @Override

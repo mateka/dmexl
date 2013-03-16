@@ -237,7 +237,7 @@ public class LazyList<Element, Operation extends IGenerateOperation<Element>> im
 
     @Override
     public List<Element> subList(int fromIndex, int toIndex) {
-        return new LazyList<>(fromIndex, toIndex, generator);
+        return new LazyList<Element, Operation>(fromIndex, toIndex, generator);
     }
     
     private final int from;

@@ -26,7 +26,7 @@ public class GenerateNode<Element, Operation extends IGenerateOperation<Element>
         Integer count = ctx.getExecutor().execute(getLeft(), ctx);
         Operation op = ctx.getExecutor().execute(getRight(), ctx);
         
-        return new LazyList<>(count, op);
+        return new LazyList<Element, Operation>(count, op);
     }
 
     @Override

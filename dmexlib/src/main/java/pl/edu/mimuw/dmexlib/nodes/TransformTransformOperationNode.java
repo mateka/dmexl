@@ -26,7 +26,7 @@ public class TransformTransformOperationNode<R, R1, A>
         ITransformOperation<R, R1> out = ctx.getExecutor().execute(getLeft(), ctx);
         ITransformOperation<R1, A> inn = ctx.getExecutor().execute(getRight(), ctx);
         
-        return new TransformTransformOperation<>(out, inn);
+        return new TransformTransformOperation<R, R1, A>(out, inn);
     }
 
     @Override

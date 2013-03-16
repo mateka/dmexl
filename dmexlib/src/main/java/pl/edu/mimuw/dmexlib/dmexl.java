@@ -20,7 +20,7 @@ public abstract class dmexl {
 
     /// Helper function for returning identity node
     static public <T> IdentityNode<T> I(T t) {
-        return new IdentityNode<>(t);
+        return new IdentityNode<T>(t);
     }
 
     static public <T> Algorithm<T> I(Algorithm<T> t) {
@@ -65,7 +65,7 @@ public abstract class dmexl {
     }
     
     static public <E, O extends IGenerateOperation<E>> GenerateNode<E,O> generateN(Algorithm<Integer> count, Algorithm<O> op) {
-        return new GenerateNode<>(count, op);
+        return new GenerateNode<E,O>(count, op);
     }
 
     /// Helper methods for creating transform nodes
@@ -82,7 +82,7 @@ public abstract class dmexl {
     }
 
     static public <R, E, O extends ITransformOperation<R, E>> TransformNode<R, E, O> transform(Algorithm<List<E>> elements, Algorithm op) {
-        return new TransformNode<>(elements, op);
+        return new TransformNode<R, E, O>(elements, op);
     }
 
     /// Helper methods for creating accumulate nodes
@@ -99,6 +99,6 @@ public abstract class dmexl {
     }
 
     static public <R, E, O extends IAccumulateOperation<R, E>> AccumulateNode<R, E, O> accumulate(Algorithm<List<E>> elements, Algorithm op) {
-        return new AccumulateNode<>(elements, op);
+        return new AccumulateNode<R, E, O>(elements, op);
     }
 }

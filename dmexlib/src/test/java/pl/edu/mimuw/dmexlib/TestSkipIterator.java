@@ -31,11 +31,11 @@ public class TestSkipIterator extends TestCase {
 //    }
     public void testCreate() {
         final List<Integer> l1 = generateList(1);
-        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1.iterator(), 0, 0);
+        SkipIterator<Integer> skipi1 = new SkipIterator<Integer>(l1.iterator(), 0, 0);
         
         try {
             final List<Integer> l2 = generateList(1);
-            SkipIterator<Integer> skipi2 = new SkipIterator<>(l2.iterator(), 2, 1);
+            SkipIterator<Integer> skipi2 = new SkipIterator<Integer>(l2.iterator(), 2, 1);
             fail("Constructor should throw for skip < start");
         } catch (IllegalArgumentException ignore) {
         }
@@ -44,12 +44,12 @@ public class TestSkipIterator extends TestCase {
     public void testHasNext() {
         // SkipIterator starting after collection should not have next
         final List<Integer> l1 = generateList(2);
-        SkipIterator<Integer> skipi1 = new SkipIterator<>(l1.iterator(), 3, 3);
+        SkipIterator<Integer> skipi1 = new SkipIterator<Integer>(l1.iterator(), 3, 3);
         assertFalse(skipi1.hasNext());
 
         // Skip iterator in collection should have next
         final List<Integer> l2 = generateList(4);
-        SkipIterator<Integer> skipi2 = new SkipIterator<>(l2.iterator(), 2, 3);
+        SkipIterator<Integer> skipi2 = new SkipIterator<Integer>(l2.iterator(), 2, 3);
         assertTrue(skipi2.hasNext());
         skipi2.next();
         assertFalse(skipi2.hasNext());
@@ -61,7 +61,7 @@ public class TestSkipIterator extends TestCase {
         final int skip = 3;
         
         final List<Integer> list = generateList(15);
-        SkipIterator<Integer> skipi = new SkipIterator<>(list.iterator(), current-1, skip);
+        SkipIterator<Integer> skipi = new SkipIterator<Integer>(list.iterator(), current-1, skip);
         
         while (skipi.hasNext()) {
             assertEquals(current, (int) skipi.next());
@@ -74,12 +74,12 @@ public class TestSkipIterator extends TestCase {
         // So after doing all parts, whole collection should have been seen.
         final List<Integer> list0 = generateList(25);
         final int parts = 5;
-        List<SkipIterator<Integer>> skipis = new ArrayList<>(parts);
+        List<SkipIterator<Integer>> skipis = new ArrayList<SkipIterator<Integer>>(parts);
         for (int i = 0; i < parts; ++i) {
-            skipis.add(new SkipIterator<>(list0.iterator(), i, parts));
+            skipis.add(new SkipIterator<Integer>(list0.iterator(), i, parts));
         }
         
-        List<Integer> result = new ArrayList<>(25);
+        List<Integer> result = new ArrayList<Integer>(25);
         for (Iterator<SkipIterator<Integer>> outer = skipis.iterator(); outer.hasNext();) {
             for (SkipIterator<Integer> inner = outer.next(); inner.hasNext();) {
                 result.add(inner.next());
@@ -91,8 +91,8 @@ public class TestSkipIterator extends TestCase {
     }
     
     public void testRemove() {
-        List<Float> list = new ArrayList<>();
-        SkipIterator<Float> skipi = new SkipIterator<>(list.iterator(), 0, 1);
+        List<Float> list = new ArrayList<Float>();
+        SkipIterator<Float> skipi = new SkipIterator<Float>(list.iterator(), 0, 1);
         try {
             skipi.remove();
             fail("SkipIterator.remove should throw");
@@ -102,7 +102,7 @@ public class TestSkipIterator extends TestCase {
 
     // Helper method for creating list of ints
     private List<Integer> generateList(int length) {
-        List<Integer> result = new ArrayList<>(length);
+        List<Integer> result = new ArrayList<Integer>(length);
         for (int i = 1; i <= length; ++i) {
             result.add(i);
         }
