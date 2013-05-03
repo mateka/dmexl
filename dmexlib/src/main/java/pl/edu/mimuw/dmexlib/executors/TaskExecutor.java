@@ -144,7 +144,7 @@ public class TaskExecutor implements IExecutor {
     }
 
     @Override
-    public <Result> Result execute(Algorithm< Result> algo, IExecutionContext ctx) throws Exception {
+    public <Result> Result execute(Algorithm<Result> algo, IExecutionContext ctx) throws Exception {
         return algo.execute(ctx);
     }
 

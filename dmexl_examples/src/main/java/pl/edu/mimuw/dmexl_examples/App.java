@@ -1,12 +1,11 @@
 package pl.edu.mimuw.dmexl_examples;
 
-import java.util.*;
 import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.LazyList;
 import static pl.edu.mimuw.dmexlib.dmexl.*;
+import pl.edu.mimuw.dmexlib.execution_contexts.CustomizableTaskExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
-import pl.edu.mimuw.dmexlib.execution_contexts.TaskExecutionContext;
+import pl.edu.mimuw.dmexlib.executors.CustomizableTaskExecutor;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
@@ -28,7 +27,8 @@ public class App {
             ITreeOptimizer optimizer = new SimpleOptimizer();
             e = new SimpleSequentialExecutionContext(optimizer);
 
-            t = new TaskExecutionContext(4);
+            CustomizableTaskExecutor taskExecutor = new CustomizableTaskExecutor(4);
+            t = new CustomizableTaskExecutionContext(taskExecutor, optimizer);
 
             // Sum all elements
             Algorithm<Float> sumAlg = I(accumulate(
