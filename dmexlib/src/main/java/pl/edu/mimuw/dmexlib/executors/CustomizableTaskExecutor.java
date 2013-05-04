@@ -5,6 +5,8 @@
 package pl.edu.mimuw.dmexlib.executors;
 
 import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pl.edu.mimuw.dmexlib.Algorithm;
@@ -13,10 +15,11 @@ import pl.edu.mimuw.dmexlib.executors.single_nodes.IAccumulateExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IFilterExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IGenerateExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.ITransformExecutor;
-import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.AccumulateExecutor;
-import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.FilterExecutor;
-import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.GenerateExecutor;
-import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.TransformExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.AccumulateExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.FilterExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.GenerateExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.IExecutorTaskManager;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.TransformExecutor;
 import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
 import pl.edu.mimuw.dmexlib.nodes.FilterNode;
 import pl.edu.mimuw.dmexlib.nodes.GenerateNode;
@@ -33,17 +36,12 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
  */
 public class CustomizableTaskExecutor implements IExecutor {
 
-    public CustomizableTaskExecutor(int nThreads) {
-        this(nThreads, new AccumulateExecutor(), new TransformExecutor(), new FilterExecutor(), new GenerateExecutor());
+    public CustomizableTaskExecutor(IExecutorTaskManager taskManager) {
+        this(taskManager, new AccumulateExecutor(taskManager), new TransformExecutor(taskManager), new FilterExecutor(taskManager), new GenerateExecutor(taskManager));
     }
 
-    public CustomizableTaskExecutor(int nThreads, IAccumulateExecutor accumulateExecutor, ITransformExecutor transformExecutor, IFilterExecutor filterExecutor, IGenerateExecutor generateExecutor) {
-        if (nThreads < 2) {
-            throw new IllegalArgumentException("nThreads < 2");
-        }
-        this.workersNumber = nThreads;
-        execService = Executors.newFixedThreadPool(workersNumber);
-        
+    public CustomizableTaskExecutor(IExecutorTaskManager taskManager, IAccumulateExecutor accumulateExecutor, ITransformExecutor transformExecutor, IFilterExecutor filterExecutor, IGenerateExecutor generateExecutor) {
+        this.taskManager = taskManager;
         this.accumulateExecutor = accumulateExecutor;
         this.transformExecutor = transformExecutor;
         this.filterExecutor = filterExecutor;
@@ -65,15 +63,7 @@ public class CustomizableTaskExecutor implements IExecutor {
     public void setGenerateExecutor(IGenerateExecutor generateExecutor) {
         this.generateExecutor = generateExecutor;
     }
-    
-    public ExecutorService getExecService() {
-        return execService;
-    }
-    
-    public int getWorkersNumber() {
-        return workersNumber;
-    }
-    
+
     @Override
     public <T> T execute(IdentityNode<T> algo, IExecutionContext ctx) throws Exception {
         return algo.execute(ctx);
@@ -106,11 +96,12 @@ public class CustomizableTaskExecutor implements IExecutor {
 
     @Override
     public void shutdown() {
-        getExecService().shutdownNow();
+        if(null != taskManager) {
+            taskManager.shutdown();
+        }
     }
     
-    private ExecutorService execService;
-    private int workersNumber;
+    IExecutorTaskManager taskManager = null;
     // Executors for one node
     IAccumulateExecutor accumulateExecutor;
     ITransformExecutor transformExecutor;

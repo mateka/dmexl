@@ -6,6 +6,7 @@ import pl.edu.mimuw.dmexlib.execution_contexts.CustomizableTaskExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
 import pl.edu.mimuw.dmexlib.executors.CustomizableTaskExecutor;
+import pl.edu.mimuw.dmexlib.executors.SimpleTaskManager;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
@@ -27,7 +28,7 @@ public class App {
             ITreeOptimizer optimizer = new SimpleOptimizer();
             e = new SimpleSequentialExecutionContext(optimizer);
 
-            CustomizableTaskExecutor taskExecutor = new CustomizableTaskExecutor(4);
+            CustomizableTaskExecutor taskExecutor = new CustomizableTaskExecutor(new SimpleTaskManager(4));
             t = new CustomizableTaskExecutionContext(taskExecutor, optimizer);
 
             // Sum all elements

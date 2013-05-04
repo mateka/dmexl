@@ -23,8 +23,12 @@ public class TaskExecutionContext extends OptimizingExecutionContext {
     }
     
     public TaskExecutionContext(ITreeOptimizer treeOptimizer, int nThreads) {
+        this(new NoOpOptimizer(), new TaskExecutor(nThreads));
+    }
+    
+    public TaskExecutionContext(ITreeOptimizer treeOptimizer, IExecutor executor) {
         super(treeOptimizer);
-        this.executor = new TaskExecutor(nThreads);
+        this.executor = executor;
     }
 
     @Override
@@ -42,5 +46,5 @@ public class TaskExecutionContext extends OptimizingExecutionContext {
         return optimize(algo).accept(this);
     }
     
-    private TaskExecutor executor;
+    private IExecutor executor;
 }
