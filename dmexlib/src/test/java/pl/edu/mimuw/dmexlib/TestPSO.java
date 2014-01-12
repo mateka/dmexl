@@ -10,11 +10,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
+import pl.edu.mimuw.dmexlib.execution_contexts.CustomizableTaskExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.execution_contexts.SimpleSequentialExecutionContext;
+import pl.edu.mimuw.dmexlib.executors.CustomizableTaskExecutor;
+import pl.edu.mimuw.dmexlib.executors.SimpleTaskManager;
 import pl.edu.mimuw.dmexlib.nodes.operations.pso.IConvergence;
 import pl.edu.mimuw.dmexlib.nodes.operations.pso.ICostFunction;
 import pl.edu.mimuw.dmexlib.nodes.operations.pso.IParticle;
+import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 import pl.edu.mimuw.dmexlib.optimizers.NoOpOptimizer;
 
 /**
@@ -27,52 +31,56 @@ public class TestPSO extends TestCase {
         super(testName);
     }
 
-    public void testH1PSO() {
-        Random rnd = new Random();
-
-        IExecutionContext ctx = new SimpleSequentialExecutionContext(new NoOpOptimizer(), rnd);
-
-        List<Particle> parts = createParticles(1000, 100.0, 100.0, rnd);
-
-        H1 cost = new H1();
-        Convergence conv = new Convergence(10000, 2.0, 0.001);
-        Algorithm<Particle> algo = dmexl.pso(parts, cost, conv);
-
-        try {
-            Particle best = ctx.execute(algo);
-            System.out.print("(");
-            System.out.print(best.getPosition().x);
-            System.out.print(", ");
-            System.out.print(best.getPosition().y);
-            System.out.print(") = ");
-            System.out.println(best.getFitness());
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
+    public void testH1PSO() throws Exception {
+        runPSOs(new H1());
     }
 
-    public void testH2PSO() {
-        Random rnd = new Random();
+    public void testH2PSO() throws Exception {
+        runPSOs(new H2());
+    }
 
-        IExecutionContext ctx = new SimpleSequentialExecutionContext(new NoOpOptimizer(), rnd);
+    private void runPSOs(BaseH h) throws Exception {
+        final long seed = 1234567890;
+        final ITreeOptimizer optimizer = new NoOpOptimizer();
 
+        IExecutionContext ctx;
+        Random rnd;
+
+        rnd = new Random(seed);
+        ctx = new SimpleSequentialExecutionContext(optimizer, rnd);
+        long seqStart = System.nanoTime();
+        double seqFitness = execPSO(ctx, h, rnd);
+        long seqStop = System.nanoTime();
+
+        rnd = new Random(seed);
+        CustomizableTaskExecutor taskExecutor = new CustomizableTaskExecutor(new SimpleTaskManager(8));
+        ctx = new CustomizableTaskExecutionContext(taskExecutor, optimizer, rnd);
+        long parStart = System.nanoTime();
+        double parFitness = execPSO(ctx, h, rnd);
+        long parStop = System.nanoTime();
+
+        assert (Math.abs(seqFitness - parFitness) < 2 * h.getError());
+        
+        System.out.println();
+        System.out.println("Seq: " + (seqStop - seqStart) / 1000000000.0 + " tasks: " + (parStop - parStart) / 1000000000.0);
+        System.out.println();
+    }
+
+    private double execPSO(IExecutionContext ctx, BaseH h, Random rnd) throws Exception {
         List<Particle> parts = createParticles(1000, 100.0, 100.0, rnd);
 
-        H2 cost = new H2();
-        Convergence conv = new Convergence(20000, 1.0, 0.001);
-        Algorithm<Particle> algo = dmexl.pso(parts, cost, conv);
+        Convergence conv = new Convergence(10000, h.getTarget(), h.getError());
+        Algorithm<Particle> algo = dmexl.pso(parts, h, conv);
 
-        try {
-            Particle best = ctx.execute(algo);
-            System.out.print("(");
-            System.out.print(best.getPosition().x);
-            System.out.print(", ");
-            System.out.print(best.getPosition().y);
-            System.out.print(") = ");
-            System.out.println(best.getFitness());
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
+        Particle best = ctx.execute(algo);
+        System.out.print("(");
+        System.out.print(best.getPosition().x);
+        System.out.print(", ");
+        System.out.print(best.getPosition().y);
+        System.out.print(") = ");
+        System.out.println(best.getFitness());
+
+        return best.getFitness();
     }
 
     private List<Particle> createParticles(int n, double x, double y, Random rnd) {
@@ -97,10 +105,21 @@ public class TestPSO extends TestCase {
         }
     }
 
-    private class H1 implements ICostFunction<Double, Point> {
+    private interface BaseH extends ICostFunction<Double, Point> {
+
+        public double getTarget();
+
+        public double getError();
+    }
+
+    private class H1 implements BaseH {
 
         @Override
         public Double evaluate(Point p) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {}
+            
             final double d = Math.sqrt(Math.pow(p.x - 8.6998, 2.0) + Math.pow(p.y - 6.7665, 2.0));
             return (f(p.x, -p.y) + f(p.y, p.x)) / (1 + d);
         }
@@ -108,17 +127,41 @@ public class TestPSO extends TestCase {
         private double f(double x, double y) {
             return Math.pow(Math.sin(x + y / 8), 2.0);
         }
+
+        @Override
+        public double getTarget() {
+            return 2.0;
+        }
+
+        @Override
+        public double getError() {
+            return 0.001;
+        }
     }
 
-    private class H2 implements ICostFunction<Double, Point> {
+    private class H2 implements BaseH {
 
         @Override
         public Double evaluate(Point p) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {}
+            
             final double sumSq = Math.pow(p.x, 2.0) + Math.pow(p.y, 2.0);
             final double numerator = Math.pow(Math.sin(Math.sqrt(sumSq)), 2.0) - 0.5;
             final double denominator = Math.pow(1 + 0.001 * sumSq, 2.0);
             final double d = Math.sqrt(Math.pow(p.x - 8.6998, 2.0) + Math.pow(p.y - 6.7665, 2.0));
             return 0.5 - numerator / denominator;
+        }
+
+        @Override
+        public double getTarget() {
+            return 1.0;
+        }
+
+        @Override
+        public double getError() {
+            return 0.001;
         }
     }
 

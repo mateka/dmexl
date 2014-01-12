@@ -28,8 +28,8 @@ public class PSONode<ValueType extends Comparable<ValueType>, Position, Particle
     public Particle execute(IExecutionContext ctx) throws Exception {
         // Calculate algorithms in subnodes
         List<Particle> particles = ctx.getExecutor().execute(getA(), ctx);
-        ICostFunction<ValueType, Position> cost = ctx.getExecutor().execute(getB(), ctx);
-        IConvergence<ValueType> covergence = ctx.getExecutor().execute(getC(), ctx);
+        CostFunction cost = ctx.getExecutor().execute(getB(), ctx);
+        Convergence covergence = ctx.getExecutor().execute(getC(), ctx);
 
         boolean stop = false;
         Particle best = null;
