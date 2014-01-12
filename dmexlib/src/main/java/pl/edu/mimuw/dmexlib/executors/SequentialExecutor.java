@@ -4,57 +4,21 @@
  */
 package pl.edu.mimuw.dmexlib.executors;
 
-import java.util.List;
-import pl.edu.mimuw.dmexlib.Algorithm;
-import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
-import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
-import pl.edu.mimuw.dmexlib.nodes.FilterNode;
-import pl.edu.mimuw.dmexlib.nodes.GenerateNode;
-import pl.edu.mimuw.dmexlib.nodes.IdentityNode;
-import pl.edu.mimuw.dmexlib.nodes.TransformNode;
-import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
-import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
-import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
-import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.AccumulateExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.FilterExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.GenerateExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.PSOExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.dummy.TransformExecutor;
 
 /**
  * Simple, sequential executor
  *
  * @author matek
  */
-public class SequentialExecutor implements IExecutor {
+public class SequentialExecutor extends CustomizableTaskExecutor {
 
-    @Override
-    public <Result> Result execute(Algorithm<Result> algo, IExecutionContext ctx) throws Exception {
-        return algo.execute(ctx);
+    public SequentialExecutor() {
+        super(null, new AccumulateExecutor(), new TransformExecutor(), new FilterExecutor(), new GenerateExecutor(), new PSOExecutor());
     }
 
-    @Override
-    public <T> T execute(IdentityNode<T> algo, IExecutionContext ctx) throws Exception {
-        return execute((Algorithm<T>) algo, ctx);
-    }
-
-    @Override
-    public <T, F extends IFilterOperation<T>> List<T> execute(FilterNode<T, F> algo, IExecutionContext ctx) throws Exception {
-        return execute((Algorithm<List<T>>) algo, ctx);
-    }
-
-    @Override
-    public <E, O extends IGenerateOperation<E>> List<E> execute(GenerateNode<E, O> algo, IExecutionContext ctx) throws Exception {
-        return execute((Algorithm<List<E>>) algo, ctx);
-    }
-
-    @Override
-    public <R, E, O extends ITransformOperation<R, E>> List<R> execute(TransformNode<R, E, O> algo, IExecutionContext ctx) throws Exception {
-        return execute((Algorithm<List<R>>) algo, ctx);
-    }
-
-    @Override
-    public <R, E, O extends IAccumulateOperation<R, E>> R execute(AccumulateNode<R, E, O> algo, IExecutionContext ctx) throws Exception {
-        return execute((Algorithm<R>) algo, ctx);
-    }
-
-    @Override
-    public void shutdown() {
-    }
 }

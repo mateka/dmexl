@@ -25,5 +25,5 @@ public class FilterExecutor implements IFilterExecutor {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    private IExecutorTaskManager taskManager;
+    private final IExecutorTaskManager taskManager;
 }

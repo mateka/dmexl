@@ -33,9 +33,8 @@ public class TransformNode<Result, Element, Operation extends ITransformOperatio
         Iterator<Element> elements = ctx.iterator(aResult);
 
         // Do sequential algorithm
-        boolean ok = true;
         List<Result> resultElements = createNewCollection();
-        while (ok && elements.hasNext()) {
+        while (elements.hasNext()) {
             resultElements.add(op.invoke(elements.next()));
         }
         

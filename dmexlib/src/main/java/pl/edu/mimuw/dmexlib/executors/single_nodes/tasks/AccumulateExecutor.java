@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IAccumulateExecutor;
@@ -113,5 +112,5 @@ public class AccumulateExecutor implements IAccumulateExecutor {
         }
     }
     
-    private IExecutorTaskManager taskManager;
+    private final IExecutorTaskManager taskManager;
 }

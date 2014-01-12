@@ -6,6 +6,7 @@ package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.executors.CustomizableTaskExecutor;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
@@ -18,7 +19,11 @@ import pl.edu.mimuw.dmexlib.optimizers.ITreeOptimizer;
 public class CustomizableTaskExecutionContext extends OptimizingExecutionContext {
 
     public CustomizableTaskExecutionContext(CustomizableTaskExecutor executor, ITreeOptimizer treeOptimizer) {
-        super(treeOptimizer);
+        this(executor, treeOptimizer, new Random());
+    }
+
+    public CustomizableTaskExecutionContext(CustomizableTaskExecutor executor, ITreeOptimizer treeOptimizer, Random rnd) {
+        super(treeOptimizer, rnd);
         this.executor = executor;
     }
 
@@ -36,6 +41,6 @@ public class CustomizableTaskExecutionContext extends OptimizingExecutionContext
     public <T> Iterator<T> iterator(List<T> i) {
         return i.iterator();
     }
-    
-    private CustomizableTaskExecutor executor;
+
+    private final CustomizableTaskExecutor executor;
 }

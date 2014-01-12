@@ -5,16 +5,14 @@
 package pl.edu.mimuw.dmexlib.executors;
 
 import java.util.List;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.execution_contexts.IExecutionContext;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IAccumulateExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IFilterExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.IGenerateExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.IPSOExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.ITransformExecutor;
+import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.PSOExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.AccumulateExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.FilterExecutor;
 import pl.edu.mimuw.dmexlib.executors.single_nodes.tasks.GenerateExecutor;
@@ -24,11 +22,15 @@ import pl.edu.mimuw.dmexlib.nodes.AccumulateNode;
 import pl.edu.mimuw.dmexlib.nodes.FilterNode;
 import pl.edu.mimuw.dmexlib.nodes.GenerateNode;
 import pl.edu.mimuw.dmexlib.nodes.IdentityNode;
+import pl.edu.mimuw.dmexlib.nodes.PSONode;
 import pl.edu.mimuw.dmexlib.nodes.TransformNode;
 import pl.edu.mimuw.dmexlib.nodes.operations.IAccumulateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IFilterOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.IGenerateOperation;
 import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
+import pl.edu.mimuw.dmexlib.nodes.operations.pso.IConvergence;
+import pl.edu.mimuw.dmexlib.nodes.operations.pso.ICostFunction;
+import pl.edu.mimuw.dmexlib.nodes.operations.pso.IParticle;
 
 /**
  *
@@ -37,15 +39,16 @@ import pl.edu.mimuw.dmexlib.nodes.operations.ITransformOperation;
 public class CustomizableTaskExecutor implements IExecutor {
 
     public CustomizableTaskExecutor(IExecutorTaskManager taskManager) {
-        this(taskManager, new AccumulateExecutor(taskManager), new TransformExecutor(taskManager), new FilterExecutor(taskManager), new GenerateExecutor(taskManager));
+        this(taskManager, new AccumulateExecutor(taskManager), new TransformExecutor(taskManager), new FilterExecutor(taskManager), new GenerateExecutor(taskManager), new PSOExecutor(taskManager));
     }
 
-    public CustomizableTaskExecutor(IExecutorTaskManager taskManager, IAccumulateExecutor accumulateExecutor, ITransformExecutor transformExecutor, IFilterExecutor filterExecutor, IGenerateExecutor generateExecutor) {
+    public CustomizableTaskExecutor(IExecutorTaskManager taskManager, IAccumulateExecutor accumulateExecutor, ITransformExecutor transformExecutor, IFilterExecutor filterExecutor, IGenerateExecutor generateExecutor, IPSOExecutor psoExecutor) {
         this.taskManager = taskManager;
         this.accumulateExecutor = accumulateExecutor;
         this.transformExecutor = transformExecutor;
         this.filterExecutor = filterExecutor;
         this.generateExecutor = generateExecutor;
+        this.psoExecutor = psoExecutor;
     }
 
     public void setAccumulateExecutor(IAccumulateExecutor accumulateExecutor) {
@@ -62,6 +65,10 @@ public class CustomizableTaskExecutor implements IExecutor {
 
     public void setGenerateExecutor(IGenerateExecutor generateExecutor) {
         this.generateExecutor = generateExecutor;
+    }
+
+    public void setPsoExecutor(IPSOExecutor psoExecutor) {
+        this.psoExecutor = psoExecutor;
     }
 
     @Override
@@ -90,21 +97,28 @@ public class CustomizableTaskExecutor implements IExecutor {
     }
 
     @Override
+    public <VT extends Comparable<VT>, P, Particle extends IParticle<VT, P>, Cost extends ICostFunction<VT, P>, Convergence extends IConvergence<VT>> Particle execute(PSONode<VT, P, Particle, Cost, Convergence> algo, IExecutionContext ctx) throws Exception {
+        return psoExecutor.execute(algo, ctx);
+    }
+
+    @Override
     public <Result> Result execute(Algorithm<Result> algo, IExecutionContext ctx) throws Exception {
         return algo.execute(ctx);
     }
 
     @Override
     public void shutdown() {
-        if(null != taskManager) {
+        if (null != taskManager) {
             taskManager.shutdown();
         }
     }
-    
+
     IExecutorTaskManager taskManager = null;
     // Executors for one node
     IAccumulateExecutor accumulateExecutor;
     ITransformExecutor transformExecutor;
     IFilterExecutor filterExecutor;
     IGenerateExecutor generateExecutor;
+    IPSOExecutor psoExecutor;
+
 }

@@ -74,5 +74,5 @@ public class TransformExecutor implements ITransformExecutor {
         }
     }
     
-    private IExecutorTaskManager taskManager;
+    private final IExecutorTaskManager taskManager;
 }

@@ -25,5 +25,5 @@ public class GenerateExecutor implements IGenerateExecutor {
         return algo.execute(ctx);
     }
     
-    private IExecutorTaskManager taskManager;
+    private final IExecutorTaskManager taskManager;
 }

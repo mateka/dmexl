@@ -6,6 +6,7 @@ package pl.edu.mimuw.dmexlib.execution_contexts;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import pl.edu.mimuw.dmexlib.Algorithm;
 import pl.edu.mimuw.dmexlib.executors.IExecutor;
 import pl.edu.mimuw.dmexlib.executors.SequentialExecutor;
@@ -23,7 +24,11 @@ public class SimpleSequentialExecutionContext extends OptimizingExecutionContext
     }
 
     public SimpleSequentialExecutionContext(ITreeOptimizer treeOptimizer) {
-        super(treeOptimizer);
+        this(treeOptimizer, new Random());
+    }
+
+    public SimpleSequentialExecutionContext(ITreeOptimizer treeOptimizer, Random rnd) {
+        super(treeOptimizer, rnd);
         this.executor = new SequentialExecutor();
     }
 
@@ -36,12 +41,11 @@ public class SimpleSequentialExecutionContext extends OptimizingExecutionContext
     public IExecutor getExecutor() {
         return executor;
     }
-    
+
     @Override
     public <Result> Result execute(Algorithm<Result> algo) throws Exception {
         return optimize(algo).accept(this);
     }
-    
-    
+
     private SequentialExecutor executor;
 }
