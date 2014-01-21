@@ -1,4 +1,4 @@
-package pl.edu.mimuw.dmexlib_rseslib;
+package pl.edu.mimuw.dmexlib_rseslib.examples;
 
 /**
  * Hello world!
