@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import rseslib.structure.attribute.Header;
 import rseslib.structure.data.DoubleData;
+import rseslib.structure.data.DoubleDataWithDecision;
 import rseslib.structure.table.DoubleDataTable;
 import rseslib.structure.table.NumericalStatistics;
 import rseslib.system.progress.Progress;
@@ -74,7 +75,11 @@ public class DoubleDataTableView implements DoubleDataTable {
         for (int i = 0; i < split.length; ++i) {
             result[i] = new ArrayList<DoubleData>();
             for (DoubleData o : split[i]) {
-                result[i].add(new DoubleDataView(o, header));
+                if (o instanceof DoubleDataWithDecision) {
+                    result[i].add(new DoubleDataWithDecisionView((DoubleDataWithDecision)o, header));
+                } else {
+                    result[i].add(new DoubleDataView(o, header));
+                }
             }
         }
         return result;
@@ -88,7 +93,11 @@ public class DoubleDataTableView implements DoubleDataTable {
         for (int i = 0; i < partition.length; ++i) {
             result[i] = new ArrayList<DoubleData>();
             for (DoubleData o : partition[i]) {
-                result[i].add(new DoubleDataView(o, header));
+                if (o instanceof DoubleDataWithDecision) {
+                    result[i].add(new DoubleDataWithDecisionView((DoubleDataWithDecision)o, header));
+                } else {
+                    result[i].add(new DoubleDataView(o, header));
+                }
             }
         }
         return result;
