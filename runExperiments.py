@@ -1,6 +1,7 @@
 import os
 import csv
 import codecs
+import time
 from subprocess import check_output
 
 memory = '6048M'
@@ -16,15 +17,18 @@ def invoke(processors, method, iterations, particles, table):
                str(iterations), str(particles), table]
 
     result = ''
+    elapsed = 0
     try:
-        result = check_output([c.encode() for c in command])
+        start = time.time()
+        result = check_output([c.encode() for c in command]).strip()
+        elapsed = time.time() - start
     except Exception, e:
         print e
 
     flog = codecs.open(log_path, 'a', encoding='utf-8')
     log = csv.writer(flog)
     log.writerow(
-        [method, processors, table, iterations, particles] + result.split('\t'))
+        [method, processors, table, iterations, particles, elapsed] + result.split('\t'))
     flog.close()
 
 
