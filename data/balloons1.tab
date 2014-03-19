@@ -29,7 +29,7 @@
 % 
 % 8. Missing Values: None
 %    
-TABLE "tic-tac-toe"
+TABLE "balloon1"
 ATTRIBUTES 5
  "Color" symbolic
  "size" symbolic

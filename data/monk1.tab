@@ -77,14 +77,13 @@
 %            (5% class noise added to the training set)
 % 
 TABLE "monk1"
-ATTRIBUTES 9
+ATTRIBUTES 8
  "a1" symbolic
  "a2" symbolic
  "a3" symbolic
  "a4" symbolic
  "a5" symbolic
  "a6" symbolic
- "a7" symbolic
  "id" symbolic
  "class" symbolic
 

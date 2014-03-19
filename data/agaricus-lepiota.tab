@@ -147,7 +147,7 @@
 %     -- poisonous: 3916 (48.2%)
 %     --     total: 8124 instances
 TABLE "Mushrooms"
-ATTRIBUTES 10
+ATTRIBUTES 23
  "cap-shape" symbolic
  "cap-surface" symbolic
  "cap-color" symbolic
