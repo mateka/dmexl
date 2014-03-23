@@ -57,7 +57,7 @@ public class PSOReductsExperiments implements IExample {
         final Inertia inertia = new PSORSFSInertia(1.4f, iterations);
         final IConvergence conv = new Convergence(iterations, 0.85, inertia);
         final Cost cost = new Cost(table);
-        final List<Particle> parts = createParticles(particles, cost.noOfAttr(), inertia);
+        final List<Particle> parts = createParticles(particles, cost.noOfAttr()-1, inertia);
 
         Algorithm<Particle> algo = dmexl.pso(parts, cost, conv);
 
