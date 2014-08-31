@@ -55,7 +55,7 @@ public class PSOReductsExperiments implements IExample {
 
         // Create input structures and algorithm
         final Inertia inertia = new PSORSFSInertia(1.4f, iterations);
-        final IConvergence conv = new Convergence(iterations, 0.85, inertia);
+        final Convergence conv = new Convergence(iterations, 0.85, inertia);
         final Cost cost = new Cost(table);
         final List<Particle> parts = createParticles(particles, cost.noOfAttr()-1, inertia);
 
@@ -80,9 +80,25 @@ public class PSOReductsExperiments implements IExample {
         }
         
         if(null != best) {
+            System.out.print(conv.getReachedGeneration());
+            System.out.print("\t");
+            
             System.out.print(best.getPosition());
             System.out.print("\t");
-            System.out.println(best.getFitness());
+            System.out.print(best.getFitness().getFitness());
+            System.out.print("\t");
+            System.out.print(best.getFitness().getAccuracy());
+            
+            System.out.print("\t");
+            System.out.print(cost.getMinAccuracy());
+            System.out.print("\t");
+            System.out.print(cost.getMaxAccuracy());
+            System.out.print("\t");
+            System.out.print(cost.getMinLength());
+            System.out.print("\t");
+            System.out.print(cost.getMaxLength());
+            
+            System.out.println();
         }
         else {
             System.out.println("Error");

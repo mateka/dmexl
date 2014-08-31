@@ -12,16 +12,16 @@ import pl.edu.mimuw.dmexlib.nodes.operations.pso.IParticle;
  *
  * @author Mateusz
  */
-public class Particle implements IParticle<Double, Position> {
+public class Particle implements IParticle<FitnessValue, Position> {
 
     public Particle(Position position, int velocity, Inertia inertia) {
         this.position = position;
-        this.fitness = 0.0;
+        this.fitness = new FitnessValue(0.0, 0.0);
         this.velocity = velocity;
         this.inertia = inertia;
 
         this.best = new Position(position);
-        this.bestFitness = 0.0;
+        this.bestFitness = new FitnessValue(0.0, 0.0);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class Particle implements IParticle<Double, Position> {
     }
 
     @Override
-    public Double getFitness() {
+    public FitnessValue getFitness() {
         return fitness;
     }
 
@@ -42,14 +42,14 @@ public class Particle implements IParticle<Double, Position> {
         velocity = calcVelocity(globalBest, rnd); // update velocity
 
         // Update particle's best
-        if (bestFitness < fitness) {
+        if (bestFitness.getFitness() < fitness.getFitness()) {
             best = prev;
             bestFitness = fitness;
         }
     }
 
     @Override
-    public void setFitness(Double newFitness) {
+    public void setFitness(FitnessValue newFitness) {
         fitness = newFitness;
     }
 
@@ -76,11 +76,11 @@ public class Particle implements IParticle<Double, Position> {
 
     // Current
     private final Position position;
-    private double fitness;
+    private FitnessValue fitness;
     private int velocity;
     private final Inertia inertia;
 
     // Best
     private Position best;
-    private double bestFitness;
+    private FitnessValue bestFitness;
 }

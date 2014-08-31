@@ -7,10 +7,8 @@ package pl.edu.mimuw.dmexlib_rseslib.pso_reducts;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import pl.edu.mimuw.dmexlib.nodes.operations.pso.ICostFunction;
 import pl.edu.mimuw.dmexlib_rseslib.data_views.DoubleDataTableView;
 import pl.edu.mimuw.dmexlib_rseslib.data_views.HeaderView;
@@ -18,14 +16,7 @@ import rseslib.processing.classification.ClassifierSet;
 import rseslib.processing.classification.CrossValidationTest;
 import rseslib.processing.classification.MultipleTestResult;
 import rseslib.processing.classification.rules.roughset.RoughSetRuleClassifier;
-import rseslib.structure.attribute.ArrayHeader;
-import rseslib.structure.attribute.Attribute;
-import rseslib.structure.attribute.Header;
-import rseslib.structure.attribute.NominalAttribute;
 import rseslib.structure.attribute.formats.HeaderFormatException;
-import rseslib.structure.data.DoubleData;
-import rseslib.structure.data.DoubleDataWithDecision;
-import rseslib.structure.data.NumberedDoubleDataObject;
 import rseslib.structure.data.formats.DataFormatException;
 import rseslib.structure.table.ArrayListDoubleDataTable;
 import rseslib.structure.table.DoubleDataTable;
@@ -36,7 +27,7 @@ import rseslib.system.progress.EmptyProgress;
  *
  * @author Mateusz
  */
-public class Cost implements ICostFunction<Double, Position> {
+public class Cost implements ICostFunction<FitnessValue, Position> {
 
     private final String CLASSIFIER_NAME = "GReducts";
 
@@ -46,17 +37,36 @@ public class Cost implements ICostFunction<Double, Position> {
     }
 
     @Override
-    public Double evaluate(Position p) {
+    public FitnessValue evaluate(Position p) {
         final double alpha = 0.9;
         final double beta = 0.1;
 
         final double length = (p.dimensions() - p.cardinality()) / p.dimensions();
+        final double acc = accuracy(p);
+        
+        updateStats(p.cardinality(), acc);
 
-        return alpha * accuracy(p) + beta * length;
+        return new FitnessValue(alpha * acc + beta * length, acc);
     }
 
     public int noOfAttr() {
         return table.attributes().noOfAttr();
+    }
+
+    public int getMinLength() {
+        return minLength;
+    }
+
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    public double getMinAccuracy() {
+        return minAccuracy;
+    }
+
+    public double getMaxAccuracy() {
+        return maxAccuracy;
     }
 
     private double accuracy(Position p) {
@@ -84,6 +94,18 @@ public class Cost implements ICostFunction<Double, Position> {
             return 0.0;
         }
     }
+    
+    private void updateStats(int length, double accuracy) {
+        minLength = Math.min(length, minLength);
+        maxLength = Math.max(length, maxLength);
+        minAccuracy = Math.min(accuracy, minAccuracy);
+        maxAccuracy = Math.max(accuracy, maxAccuracy);
+    }
 
     private final DoubleDataTable table;
+    private int minLength = Integer.MAX_VALUE;
+    private int maxLength = Integer.MIN_VALUE;
+    private double minAccuracy = Double.MAX_VALUE;
+    private double maxAccuracy = Double.MIN_VALUE;
+    
 }
